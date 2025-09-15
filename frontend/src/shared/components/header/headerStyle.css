@@ -1,0 +1,95 @@
+.header-container {
+  width: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* optional shadow */
+  height: 72px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: ease-in-out
+}
+
+.header-container.sticky {
+  /* background-color: #2d3748; */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+  
+.left-section, .middle-section, .right-section {
+  display: flex;
+  align-items: center;
+}
+  
+  .logo-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #48bb78; /* Chakra UI green */
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    margin-right: 10px;
+  }
+  
+  .site-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+  }
+  
+  .middle-section {
+    flex-grow: 1; /* Allow the middle section to take available space */
+    justify-content: center; /* Center the navigation buttons */
+}
+  
+  .nav-button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    color: #48bb78; /* Chakra UI gray */
+    cursor: pointer;
+    margin: 0 10px;
+  }
+  
+  .nav-button:hover {
+    color: #48bb78; /* Chakra UI green */
+  }
+
+  .nav-button-active {
+    color: #48bb78; /* Chakra UI green */
+  }
+  
+  .right-section {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-right: 10px;
+  }
+  
+  .icon-button {
+    background-color: transparent;
+    margin-left: 10px;
+  }
+  
+  .avatar {
+    cursor: pointer;
+    border: 1px solid #e0e0e0;
+  }
+
+  @media (max-width: 768px) {
+    .nav-button {
+        display: none; /* Hide navigation buttons on mobile */
+    }
+
+    .right-section {
+        justify-content: flex-end; /* Align right section to the end */
+    }
+
+    .mobile-nav-button {
+        display: block; /* Show mobile navigation button */
+    }
+}
+  

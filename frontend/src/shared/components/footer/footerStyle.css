@@ -1,0 +1,82 @@
+/* footerStyle.css */
+
+/* General Footer Container */
+.footer {
+    background-color: #f9fafb; /* gray.50 */
+    color: #1a202c; /* gray.800 */
+    padding-top: 2.5rem; /* pt={10} */
+    padding-bottom: 1rem; /* pb={4} */
+}
+  
+  /* Top Section */
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2.5rem; /* px={10} */
+    flex-wrap: wrap;
+}
+
+.main-logo {
+    max-width: 30px;
+}
+  
+  .footer-section {
+    min-width: 200px; /* minW="200px" */
+}
+  
+  .footer-heading {
+    font-size: 22px; /* fontSize="lg" */
+    font-weight: 600; /* fontWeight="semibold" */
+    color: #4a5568; /* gray.700 */
+}
+  
+  .footer-link {
+    font-size: 14px; /* fontSize="sm" */
+    color: #1a202c; /* gray.800 */
+    text-decoration: none;
+    transition: color 0.3s;
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+  
+  .footer-link:hover {
+    color: #319795; /* teal.500 */
+}
+  
+  .footer-logo-heading {
+    font-size: 1.25rem; /* fontSize="xl" */
+    font-weight: 700; /* fontWeight="bold" */
+    color: #1a202c; /* gray.900 */
+}
+  
+  .footer-subtext {
+    font-size: 0.875rem; /* fontSize="sm" */
+    color: #718096; /* gray.500 */
+}
+  
+  /* Divider */
+  .footer-divider {
+    border-top: 1px solid #e2e8f0; /* gray.200 */
+}
+  
+  /* Bottom Section */
+  .footer-bottom {
+    padding: 0.75rem 2.5rem; /* py={3}, px={10} */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+  
+  .footer-bottom-text {
+    font-size: 14px;
+    color: white;
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}

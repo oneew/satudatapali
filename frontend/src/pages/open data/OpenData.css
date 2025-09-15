@@ -1,0 +1,47 @@
+.banner {
+    display: flex;
+    align-items: center;
+    max-height: 1440px;
+    padding: 40px;
+}
+
+.banner-heading {
+    font-size: 48px;
+    font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.left-side-banner {
+    margin: auto;
+    margin-left: 80px;
+}
+
+.banner-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+  
+  .banner-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+}
+  
+  .image-placeholder {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+  
+.search-button {
+    display: flex;
+    margin-top: 10px;
+    width: 100%;
+    height: 40px;
+}

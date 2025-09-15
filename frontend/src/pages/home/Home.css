@@ -1,0 +1,38 @@
+.home-container {
+    min-height: calc(100vh - 72px);
+    background-color: #f9f9f9; /* Light background color */
+    background-image: url("../../shared/images/bg.jpg"); 
+    background-size: cover;
+    display: flex;
+    align-items: center;
+  }
+
+  .stack-container {
+    width: 60%;
+  }
+  
+  .text-container {
+    text-align: left;
+    color: #2d3748; /* Chakra UI gray */
+    padding: 20px;
+    padding-bottom: 30%;
+  }
+  
+  .main-heading {
+    font-size: 58px;
+    font-weight: bold;
+  }
+  
+  .highlight {
+    color: #5CC5A9; /* Chakra UI green */
+  }
+  
+  .subheading {
+    font-size: 16px;
+    margin-top: 10px;
+    line-height: 1.8;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  

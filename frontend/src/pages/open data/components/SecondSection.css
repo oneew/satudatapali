@@ -1,0 +1,61 @@
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+Text {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.header-title {
+  font-family: "Arial", sans-serif;
+}
+
+.header-subtitle {
+  font-family: "Arial", sans-serif;
+}
+
+.header-button {
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.stats-grid {
+  gap: 20px;
+}
+
+.stats-card {
+  text-align: center;
+}
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.custom-input {
+  flex: 1;
+  border-radius: 4px;
+}
+
+.custom-select {
+  flex: 1;
+  border-radius: 4px;
+}
+
+.dataset-list {
+  margin-top: 20px;
+}
+
+.dataset-card {
+  transition: all 0.3s ease;
+}
+
+.dataset-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
