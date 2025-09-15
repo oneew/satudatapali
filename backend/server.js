@@ -8,6 +8,7 @@ import FileDownload from './routes/FileDownload.js';
 import filepageRoute from "./routes/filesRoute.js"
 import dashboardRoute from "./routes/dashboardRoute.js"
 import usersRoute from "./routes/usersRoute.js"
+import integrationRoute from "./routes/integrationRoute.js"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +36,9 @@ app.use("/v1/dashboard", dashboardRoute);
 
 app.use("/v1/download", FileDownload);
 
+// New integration routes
+app.use("/v1/integration", integrationRoute);
+
 // this route is redirecting every unknown route to index.html
 app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "dist", "index.html"));
@@ -44,8 +48,8 @@ app.get("*", (req, res) => {
 connectDB();
 
 
-// listen to env port config or 5000
-const PORT = process.env.PORT || 5000;
+// listen to env port config or 5001 (instead of 5000 to avoid conflicts)
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

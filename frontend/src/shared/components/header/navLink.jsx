@@ -11,56 +11,55 @@ import './headerStyle.css'
 import '../../../index.css'
 
 function NavLink() {
-    const [isOpen, setIsOpen] = React.useState(false);
     const location = useLocation();
 
   return (
     <ButtonGroup 
-      direction={{ base: 'column', md: 'row' }} // Stack vertically on small screens, horizontally on medium and up
       spacing={2} 
       align="center"
     >
       <Link to={"/"}>
-      <Button 
-      color='white' 
-      variant='ghost' 
-      className="nav-button poppins-medium"
-      isActive={location.pathname === '/'}
-      leftIcon={<RiHome5Line />}
-      >Dashboard Pali</Button>
+        <Button 
+          color='white' 
+          variant='ghost' 
+          className={`nav-button poppins-medium ${location.pathname === '/' ? 'nav-button-active' : ''}`}
+          leftIcon={<RiHome5Line />}
+        >
+          Beranda
+        </Button>
       </Link>
 
       <Link to={"/opendata"}>
-      <Button 
-      color='white'
-      variant='ghost' 
-      className="nav-button poppins-medium"
-      isActive={location.pathname === '/opendata'}
-      leftIcon={<RiPieChart2Line />}>
-        Open Data Pali</Button>
+        <Button 
+          color='white'
+          variant='ghost' 
+          className={`nav-button poppins-medium ${location.pathname === '/opendata' ? 'nav-button-active' : ''}`}
+          leftIcon={<RiPieChart2Line />}>
+          Data Terbuka
+        </Button>
       </Link>
 
       <Link to={"/satudata"}>
-      <Button 
-      color='white'
-      variant='ghost' 
-      className="nav-button poppins-medium"
-      isActive={location.pathname === '/satudata'}
-      leftIcon={<FiBox />}>
-        Satu Data Pali</Button>
+        <Button 
+          color='white'
+          variant='ghost' 
+          className={`nav-button poppins-medium ${location.pathname === '/satudata' ? 'nav-button-active' : ''}`}
+          leftIcon={<FiBox />}>
+          Satu Data
+        </Button>
       </Link>
 
       <a href='https://gis-pbb.palikab.go.id/' target='_blank' rel='noopener noreferrer'>
-      <Button 
-      color='white'
-      variant='ghost'
-      className="nav-button poppins-medium"
-      leftIcon={<IoSettingsOutline />}>
-        Satu Peta Pali</Button>
+        <Button 
+          color='white'
+          variant='ghost'
+          className="nav-button poppins-medium"
+          leftIcon={<IoSettingsOutline />}>
+          Satu Peta
+        </Button>
       </a>
-    
     </ButtonGroup>
   )
 }
 
-export default NavLink
+export default NavLink;

@@ -34,12 +34,17 @@ function Header() {
     }, []);
 
   return (
-    <Box as="header" backgroundColor='teal.800' className={`header-container ${isSticky ? 'sticky' : ''}`}>
-      <Flex justify="space-between" align="center" p={4}>
-        <Box className="left-section" width='20%'>
-          <Image src='/sdi2.png' width='20%'/>
-          <span className="site-title poppins-bold">SDI</span>
-          <span className="site-title poppins-light">.KAB.PALI</span>
+    <Box as="header" className={`header-container ${isSticky ? 'sticky' : ''}`}>
+      <Flex justify="space-between" align="center" p={{ base: 2, md: 4 }}>
+        <Box className="left-section" width={{ base: '40%', sm: '30%', md: '20%' }}>
+          <Flex className="logo-container">
+            <Box className="logo-circle">SD</Box>
+            <Box>
+              <span className="site-title poppins-bold">SATU DATA</span>
+              <br />
+              <span className="site-title poppins-light">KAB. PALI</span>
+            </Box>
+          </Flex>
         </Box>
 
         <Box className="middle-section">
@@ -47,7 +52,7 @@ function Header() {
         </Box>
 
         <Box className='right-section'>
-
+          {/* Add user profile or other icons here */}
         </Box>
       </Flex>
     </Box>

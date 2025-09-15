@@ -5,6 +5,7 @@ import Header from "./shared/components/header/header";
 import Footer from "./shared/components/footer/footer";
 
 import "./App.css";
+import "./shared/styles/global.css";
 import Home from "./pages/home/Home.jsx";
 import OpenData from "./pages/open data/OpenData";
 import Login from "./pages/login/Login.jsx";
