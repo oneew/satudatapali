@@ -57,6 +57,12 @@ We have implemented a comprehensive integration system that allows the Satu Data
    - Shows synchronization progress and results
    - Includes SIPD-specific operations in a tabbed interface
 
+3. **SIPD Integration Panel** ([frontend/src/pages/satudata/components/SipdIntegrationPanel.jsx](file:///c%3A/Users/User/OneDrive/Desktop/satudatapali/frontend/src/pages/satudata/components/SipdIntegrationPanel.jsx))
+   - Dedicated panel for administrators to manage SIPD integration
+   - Bulk synchronization of all verified files
+   - Data fetching operations (regular, final, reference)
+   - Dataset disable request functionality
+
 ## API Endpoints
 
 The following endpoints are available under `/v1/integration`:
@@ -68,6 +74,10 @@ The following endpoints are available under `/v1/integration`:
 5. `GET /sipd/final` - Fetch final data from SIPD e-walidata
 6. `GET /sipd/reference` - Fetch reference data from SIPD e-walidata
 7. `POST /sipd/disable` - Send disable request to SIPD e-walidata
+
+For detailed information about all API endpoints, see:
+- [API Reference](docs/API_REFERENCE.md) - Complete API documentation
+- [SIPD API Endpoints](SIPD_API_ENDPOINTS.md) - Quick reference for SIPD endpoints
 
 ## Data Transformation
 
@@ -99,11 +109,15 @@ The system automatically transforms data between formats:
 3. Use the "SIPD Data" button to access SIPD-specific operations
 4. Use the sync icons in the table to synchronize individual files
 5. Select target systems (SPLP, SIPD, or both) during synchronization
+6. Access the dedicated SIPD Integration Panel for advanced operations
 
 ### For Developers:
 1. Configure environment variables with external API URLs and keys
 2. Use the integration service classes to extend functionality
-3. Refer to the detailed documentation in [INTEGRATION_GUIDE.md](file:///c%3A/Users/User/OneDrive/Desktop/satudatapali/INTEGRATION_GUIDE.md) and [USAGE_INTEGRATION.md](file:///c%3A/Users/User/OneDrive/Desktop/satudatapali/USAGE_INTEGRATION.md)
+3. Refer to the detailed documentation:
+   - [INTEGRATION_GUIDE.md](file:///c%3A/Users/User/OneDrive/Desktop/satudatapali/INTEGRATION_GUIDE.md) - General integration guide
+   - [SIPD_INTEGRATION_GUIDE.md](file:///c%3A/Users/User/OneDrive/Desktop/satudatapali/SIPD_INTEGRATION_GUIDE.md) - SIPD-specific integration guide
+   - [USAGE_INTEGRATION.md](file:///c%3A/Users/User/OneDrive/Desktop/satudatapali/USAGE_INTEGRATION.md) - Usage instructions
 
 ## SIPD E-Walidata Specific Features
 
@@ -117,6 +131,8 @@ The integration now supports all the specific endpoints provided for SIPD E-Wali
    - `get_dssd` - API mengambil hasil entry data statistik sektoral
    - `get_dssd_final` - API mengambil hasil entry data statistik sektoral yang sudah final
    - `get_ref_dssd` - API mengambil referensi data statistik sektoral
+
+For detailed information about the SIPD integration, see the [SIPD Integration Guide](SIPD_INTEGRATION_GUIDE.md).
 
 ## Future Enhancements
 

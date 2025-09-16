@@ -1,0 +1,16 @@
+{
+  "name": "satudatapali-docs",
+  "version": "1.0.0",
+  "description": "Documentation for Satu Data Portal integration with SIPD E-Walidata",
+  "type": "module",
+  "scripts": {
+    "test-sipd": "node ../test-sipd-api.js"
+  },
+  "keywords": [
+    "sipd",
+    "integration",
+    "documentation"
+  ],
+  "author": "Satu Data Portal Team",
+  "license": "MIT"
+}

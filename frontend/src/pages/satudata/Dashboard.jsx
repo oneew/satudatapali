@@ -10,6 +10,11 @@ import {
   InputGroup,
   InputLeftElement,
   IconButton,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import axios from "axios";
@@ -25,6 +30,7 @@ import RegisterUser from "./components/RegisterUser";
 import DeleteUser from "./components/DeleteUser";
 import UploadData from "./components/UploadData";
 import EditFile from "./components/EditFile";
+import SipdIntegrationPanel from "./components/SipdIntegrationPanel";
 
 const Dashboard = () => {
   const { user, token } = useAuth();
@@ -171,6 +177,27 @@ const Dashboard = () => {
           </>
         )}
       </Grid>
+
+      {/* SIPD Integration Panel for Admin */}
+      {(user.role === "Admin" || user.role === "admin") && (
+        <Box mt={6}>
+          <Accordion defaultIndex={[0]} allowMultiple>
+            <AccordionItem>
+              <h2>
+                <AccordionButton>
+                  <Box flex="1" textAlign="left">
+                    <Text fontSize="lg" fontWeight="bold">Panel Integrasi SIPD</Text>
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+              </h2>
+              <AccordionPanel pb={4}>
+                <SipdIntegrationPanel />
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
+        </Box>
+      )}
 
       <CustomModal
         isOpen={isModalOpen}

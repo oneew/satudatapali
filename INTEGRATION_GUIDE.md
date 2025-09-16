@@ -27,7 +27,9 @@ Replace the URLs and API key with the actual values provided by the respective s
 
 ## API Endpoints
 
-The integration APIs are available under the `/v1/integration` route:
+The integration APIs are available under the `/v1/integration` route. For detailed information about all API endpoints, see:
+- [API Reference](docs/API_REFERENCE.md) - Complete API documentation
+- [SIPD API Endpoints](SIPD_API_ENDPOINTS.md) - Quick reference for SIPD endpoints
 
 ### Synchronize a File
 ```
@@ -106,6 +108,8 @@ Request body:
   }
 }
 ```
+
+For detailed information about the SIPD integration, see the [SIPD Integration Guide](SIPD_INTEGRATION_GUIDE.md).
 
 ## Data Transformation
 
