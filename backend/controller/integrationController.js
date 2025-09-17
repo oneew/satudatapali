@@ -158,31 +158,46 @@ export const fetchDataFromExternal = async (req, res) => {
  * @param {Object} res - Express response object
  */
 export const fetchFinalDataFromSipd = async (req, res) => {
-    try {
-        const { kodepemda } = req.query;
-        const result = await integrationService.fetchFinalFromSipd(kodepemda || '1612');
-
-        if (!result.success) {
-            return res.status(400).json({
-                success: false,
-                message: result.message,
-                error: result.error
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: 'Final data successfully fetched from SIPD e-walidata',
-            data: result.data
-        });
-    } catch (error) {
-        console.error('Fetch final data from SIPD error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Internal server error while fetching final data from SIPD',
-            error: error.message
-        });
+  try {
+    const { kodepemda } = req.query;
+    
+    // Validate input
+    if (kodepemda && (typeof kodepemda !== 'string' || kodepemda.trim() === '')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid kodepemda parameter',
+        error: 'Kodepemda must be a non-empty string'
+      });
     }
+    
+    const result = await integrationService.fetchFinalFromSipd(kodepemda || '1612');
+
+    // Log the result for debugging
+    console.log('SIPD fetch result:', JSON.stringify(result, null, 2));
+
+    if (!result.success) {
+      // Return more detailed error information
+      return res.status(400).json({
+        success: false,
+        message: result.message || 'Failed to fetch data from SIPD',
+        error: result.error || 'Unknown error occurred',
+        raw: result.raw || null // Include raw data if available
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Final data successfully fetched from SIPD e-walidata',
+      data: result.data
+    });
+  } catch (error) {
+    console.error('Fetch final data from SIPD error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error while fetching final data from SIPD',
+      error: error.message
+    });
+  }
 };
 
 /**

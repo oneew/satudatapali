@@ -111,23 +111,28 @@ export const transformSplpToLocal = (splpData) => {
  * @returns {Object} Transformed data
  */
 export const transformSipdToLocal = (sipdData) => {
-    return {
-        _id: sipdData.id_dataset,
-        name: sipdData.nama_dataset,
-        temadataset: sipdData.tema_dataset,
-        metaData: {
-            produsen: sipdData.produsen_data,
-            cakupandata: sipdData.cakupan_data,
-            frekuensi: sipdData.frekuensi_data,
-            dimensidataset: sipdData.dimensi_data,
-            createdAt: sipdData.tanggal_dibuat,
-            updatedAt: sipdData.tanggal_diubah,
-        },
-        filename: sipdData.nama_file,
-        fileType: sipdData.tipe_file,
-        isPublic: sipdData.publik === 'Ya',
-        StatusVerifikasi: sipdData.status_verifikasi,
-    };
+  // Handle case where sipdData might be null or undefined
+  if (!sipdData || typeof sipdData !== 'object') {
+    return {};
+  }
+  
+  return {
+    _id: sipdData.id_dataset || '',
+    name: sipdData.nama_dataset || '',
+    temadataset: sipdData.tema_dataset || '',
+    metaData: {
+      produsen: sipdData.produsen_data || '',
+      cakupandata: sipdData.cakupan_data || '',
+      frekuensi: sipdData.frekuensi_data || '',
+      dimensidataset: sipdData.dimensi_data || '',
+      createdAt: sipdData.tanggal_dibuat || null,
+      updatedAt: sipdData.tanggal_diubah || null,
+    },
+    filename: sipdData.nama_file || '',
+    fileType: sipdData.tipe_file || '',
+    isPublic: sipdData.publik === 'Ya',
+    StatusVerifikasi: sipdData.status_verifikasi || 'Belum Verifikasi',
+  };
 };
 
 /**

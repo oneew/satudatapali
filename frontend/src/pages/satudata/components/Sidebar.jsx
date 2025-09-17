@@ -223,21 +223,8 @@ const Sidebar = () => {
       transition="all 0.3s ease"
     >
       <Flex h="20" alignItems="center" mx="4" justifyContent="flex-start">
-        <Box
-          bg="teal.500"
-          borderRadius="md"
-          p={2}
-          mr={3}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Text fontSize="lg" fontWeight="bold" color="white">
-            SD
-          </Text>
-        </Box>
-        <Text fontSize="xl" fontWeight="bold" color="teal.500">
-          Admin Panel
+        <Text fontSize="2xl" fontWeight="bold" color="teal.500" margin="1rem">
+         SatuData PALI
         </Text>
       </Flex>
       

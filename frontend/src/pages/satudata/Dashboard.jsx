@@ -24,6 +24,9 @@ import {
   useDisclosure,
   Button,
   Container,
+  Select,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
 import { SearchIcon, HamburgerIcon } from "@chakra-ui/icons";
 import axios from "axios";
@@ -41,6 +44,8 @@ import UploadData from "./components/UploadData";
 import EditFile from "./components/EditFile";
 import SipdIntegrationPanel from "./components/SipdIntegrationPanel";
 import Sidebar from "./components/Sidebar";
+import DataSummary from "./components/DataSummary";
+import SipdDataDisplay from "./components/SipdDataDisplay";
 
 const Dashboard = () => {
   const { user, token } = useAuth();
@@ -48,8 +53,37 @@ const Dashboard = () => {
   const [modalContent, setModalContent] = useState({ title: "", body: null });
   const [files, setFiles] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedPerangkatDaerah, setSelectedPerangkatDaerah] = useState("");
+  const [perangkatDaerahOptions, setPerangkatDaerahOptions] = useState([]);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // Extract unique years from files
+  const getUniqueYears = (files) => {
+    const years = files.map(file => {
+      if (file.metaData && file.metaData.createdAt) {
+        return new Date(file.metaData.createdAt).getFullYear();
+      }
+      return null;
+    }).filter(year => year !== null);
+    
+    // Remove duplicates and sort
+    return [...new Set(years)].sort((a, b) => b - a);
+  };
+
+  // Extract unique perangkat daerah from files
+  const getUniquePerangkatDaerah = (files) => {
+    const perangkatDaerah = files.map(file => {
+      if (file.metaData && file.metaData.produsen) {
+        return file.metaData.produsen;
+      }
+      return null;
+    }).filter(pd => pd !== null);
+    
+    // Remove duplicates
+    return [...new Set(perangkatDaerah)];
+  };
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -60,6 +94,10 @@ const Dashboard = () => {
           },
         });
         setFiles(response.data);
+        
+        // Set perangkat daerah options
+        const uniquePerangkatDaerah = getUniquePerangkatDaerah(response.data);
+        setPerangkatDaerahOptions(uniquePerangkatDaerah);
       } catch (err) {
         console.error("Error fetching files", err);
         toast({
@@ -118,12 +156,45 @@ const Dashboard = () => {
     setSearchTerm(event.target.value);
   };
 
-  // Filter files based on search term
-  const filteredFiles = files.filter(file => 
-    file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    file.temadataset.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    file.metaData.produsen.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleYearChange = (event) => {
+    setSelectedYear(event.target.value);
+  };
+
+  const handlePerangkatDaerahChange = (event) => {
+    setSelectedPerangkatDaerah(event.target.value);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedYear("");
+    setSelectedPerangkatDaerah("");
+  };
+
+  // Filter files based on search term, year, and perangkat daerah
+  const filteredFiles = files.filter(file => {
+    // Search filter
+    const matchesSearch = !searchTerm || 
+      file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      file.temadataset.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (file.metaData && file.metaData.produsen && 
+       file.metaData.produsen.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    // Year filter
+    const fileYear = file.metaData && file.metaData.createdAt ? 
+      new Date(file.metaData.createdAt).getFullYear() : null;
+    const matchesYear = !selectedYear || fileYear == selectedYear;
+    
+    // Perangkat daerah filter
+    const filePerangkatDaerah = file.metaData && file.metaData.produsen ? 
+      file.metaData.produsen : null;
+    const matchesPerangkatDaerah = !selectedPerangkatDaerah || 
+      filePerangkatDaerah === selectedPerangkatDaerah;
+    
+    return matchesSearch && matchesYear && matchesPerangkatDaerah;
+  });
+
+  // Get unique years for the year filter dropdown
+  const uniqueYears = getUniqueYears(files);
 
   return (
     <Flex minH="100vh" bg="gray.50">
@@ -204,26 +275,8 @@ const Dashboard = () => {
               Dashboard Admin
             </Heading>
             
-            <InputGroup maxW="400px">
-              <InputLeftElement pointerEvents="none">
-                <SearchIcon color="gray.400" />
-              </InputLeftElement>
-              <Input
-                placeholder="Cari file, tema, atau produsen..."
-                value={searchTerm}
-                onChange={handleSearch}
-                bg="gray.50"
-                borderRadius="lg"
-                borderColor="gray.200"
-                _focus={{
-                  borderColor: "teal.500",
-                  boxShadow: "0 0 0 1px teal.500",
-                }}
-              />
-            </InputGroup>
-            
             <Flex align="center" gap={4}>
-              <Box textAlign="right">
+              <Box textAlign="left"> 
                 <Text fontWeight="semibold" color="gray.700">
                   {user.user}
                 </Text>
@@ -249,12 +302,12 @@ const Dashboard = () => {
               {user.role === "Admin" || user.role === "admin" ? (
                 <>
                   <QuickAccessCard
-                    title="Hapus Pengguna"
+                    title="Daftar Pengguna"
                     details="Klik untuk menghapus pengguna dari sistem"
                     onOpen={() => handleOpenModal("Hapus Pengguna", <DeleteUser />)}
                   />
                   <QuickAccessCard
-                    title="Daftar Pengguna"
+                    title="Tambah Pengguna"
                     details="Klik untuk menambahkan pengguna baru"
                     onOpen={() => handleOpenModal("Daftar Pengguna", <RegisterUser />)}
                   />
@@ -309,17 +362,87 @@ const Dashboard = () => {
             </Box>
           )}
 
+          {/* Data Summary Visualization */}
+          <Box mb={8}>
+            <DataSummary files={filteredFiles} />
+          </Box>
+
+          {/* SIPD Data Display */}
+          <Box mb={8}>
+            <SipdDataDisplay />
+          </Box>
+
           <CustomModal
             isOpen={isModalOpen}
             onClose={handleCloseModal}
             content={modalContent}
           />
 
-          {/* Assets Table */}
+          {/* Assets Table with Filters */}
           <Box>
-            <Heading as="h2" size="md" mb={4} color="gray.700">
-              Data File
-            </Heading>
+            <Flex justify="space-between" align="center" mb={4}>
+              <Heading as="h2" size="md" color="gray.700">
+                Data File
+              </Heading>
+              <Button size="sm" onClick={clearFilters} colorScheme="teal" variant="outline">
+                Bersihkan Filter
+              </Button>
+            </Flex>
+            
+            {/* Filter Controls */}
+            <Box bg="white" borderRadius="lg" boxShadow="sm" border="1px" borderColor="gray.200" p={4} mb={4}>
+              <Grid 
+                templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }} 
+                gap={4}
+              >
+                <FormControl>
+                  <FormLabel fontSize="sm">Tahun</FormLabel>
+                  <Select 
+                    placeholder="Pilih Tahun" 
+                    value={selectedYear}
+                    onChange={handleYearChange}
+                  >
+                    {uniqueYears.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </Select>
+                </FormControl>
+                
+                <FormControl>
+                  <FormLabel fontSize="sm">Perangkat Daerah</FormLabel>
+                  <Select 
+                    placeholder="Pilih Perangkat Daerah" 
+                    value={selectedPerangkatDaerah}
+                    onChange={handlePerangkatDaerahChange}
+                  >
+                    {perangkatDaerahOptions.map(pd => (
+                      <option key={pd} value={pd}>{pd}</option>
+                    ))}
+                  </Select>
+                </FormControl>
+                
+                <FormControl gridColumn={{ base: "span 2", md: "span 2" }}>
+                  <FormLabel fontSize="sm">Cari Data</FormLabel>
+                  <InputGroup>
+                    <InputLeftElement pointerEvents="none">
+                      <SearchIcon color="gray.400" />
+                    </InputLeftElement>
+                    <Input
+                      placeholder="Cari berdasarkan nama, tema, atau produsen..."
+                      value={searchTerm}
+                      onChange={handleSearch}
+                    />
+                  </InputGroup>
+                </FormControl>
+              </Grid>
+            </Box>
+            
+            {/* Results Info */}
+            <Text fontSize="sm" color="gray.600" mb={4}>
+              Menampilkan {filteredFiles.length} dari {files.length} data
+            </Text>
+            
+            {/* Assets Table */}
             <Box bg="white" borderRadius="lg" boxShadow="sm" border="1px" borderColor="gray.200" p={2}>
               <AssetsTable files={filteredFiles} onDelete={handleDelete} />
             </Box>
