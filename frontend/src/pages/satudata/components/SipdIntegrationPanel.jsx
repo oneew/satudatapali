@@ -21,7 +21,25 @@ import {
   TabPanel,
   HStack,
   Divider,
-  Badge
+  Badge,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  TableContainer,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Heading,
+  Flex,
+  Icon,
+  Spinner,
+  Select,
+  Grid,
+  GridItem
 } from '@chakra-ui/react';
 import { 
   FiRefreshCw, 
@@ -29,7 +47,14 @@ import {
   FiCheckCircle, 
   FiInfo, 
   FiXCircle,
-  FiPlay
+  FiPlay,
+  FiDatabase,
+  FiFileText,
+  FiCalendar,
+  FiUser,
+  FiClock,
+  FiTag,
+  FiMapPin
 } from 'react-icons/fi';
 import { useAuth } from '../../../context/AuthContext';
 import axios from 'axios';
@@ -108,13 +133,13 @@ const SipdIntegrationPanel = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        // For regular data, we need a datasetId, but we'll use a placeholder
+        // For regular data, we'll use final data as default
         response = await axios.get(`/v1/integration/sipd/final?kodepemda=${kodepemda}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
       
-      setSipdData(response.data);
+      setSipdData({ type, data: response.data });
       
       toast({
         title: 'Data berhasil diambil',
@@ -174,6 +199,241 @@ const SipdIntegrationPanel = () => {
         isClosable: true,
       });
     }
+  };
+
+  // Render data table based on the type of data fetched
+  const renderSipdDataTable = () => {
+    if (!sipdData || !sipdData.data) return null;
+
+    const { type, data } = sipdData;
+
+    if (type === 'reference') {
+      // Render reference data (usually simpler structure)
+      return (
+        <Card mt={4}>
+          <CardHeader>
+            <Heading size="md">Data Referensi SIPD</Heading>
+          </CardHeader>
+          <CardBody>
+            <Box maxH="300px" overflowY="auto">
+              <pre>{JSON.stringify(data, null, 2)}</pre>
+            </Box>
+          </CardBody>
+        </Card>
+      );
+    }
+
+    // For final and regular data, try to render as a table
+    if (data.data && Array.isArray(data.data)) {
+      const dataArray = data.data;
+      
+      // Try to determine columns from the first item
+      const firstItem = dataArray[0];
+      if (!firstItem) {
+        return (
+          <Alert status="info" mt={4}>
+            <AlertIcon />
+            <AlertTitle>Tidak ada data</AlertTitle>
+            <AlertDescription>Data kosong dari SIPD</AlertDescription>
+          </Alert>
+        );
+      }
+
+      // Map SIPD field names to more readable labels
+      const fieldLabels = {
+        id_dataset: 'ID Dataset',
+        nama_dataset: 'Nama Dataset',
+        tema_dataset: 'Tema',
+        produsen_data: 'Produsen',
+        cakupan_data: 'Cakupan',
+        frekuensi_data: 'Frekuensi',
+        dimensi_data: 'Dimensi',
+        nama_file: 'Nama File',
+        tipe_file: 'Tipe File',
+        publik: 'Publik',
+        status_verifikasi: 'Status Verifikasi',
+        tanggal_dibuat: 'Tanggal Dibuat',
+        tanggal_diubah: 'Tanggal Diubah'
+      };
+
+      // Get columns from the first item
+      const columns = Object.keys(firstItem);
+
+      return (
+        <Card mt={4}>
+          <CardHeader>
+            <Heading size="md">
+              {type === 'final' ? 'Data Final SIPD' : 'Data SIPD'}
+            </Heading>
+            <Text fontSize="sm" color="gray.500">
+              Menampilkan {dataArray.length} dataset
+            </Text>
+          </CardHeader>
+          <CardBody>
+            <TableContainer>
+              <Table variant="simple" size="sm">
+                <Thead>
+                  <Tr>
+                    {columns.map((col, index) => (
+                      <Th key={index}>{fieldLabels[col] || col}</Th>
+                    ))}
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {dataArray.slice(0, 10).map((item, rowIndex) => (
+                    <Tr key={rowIndex}>
+                      {columns.map((col, colIndex) => (
+                        <Td key={colIndex}>
+                          {typeof item[col] === 'object' 
+                            ? JSON.stringify(item[col]) 
+                            : String(item[col] || '')}
+                        </Td>
+                      ))}
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </TableContainer>
+            {dataArray.length > 10 && (
+              <Text fontSize="sm" color="gray.500" mt={2}>
+                Menampilkan 10 dari {dataArray.length} dataset. Gunakan API untuk melihat semua data.
+              </Text>
+            )}
+          </CardBody>
+        </Card>
+      );
+    }
+
+    // Fallback to raw data display
+    return (
+      <Card mt={4}>
+        <CardHeader>
+          <Heading size="md">
+            {type === 'final' ? 'Data Final SIPD' : 'Data SIPD'}
+          </Heading>
+        </CardHeader>
+        <CardBody>
+          <Box maxH="300px" overflowY="auto">
+            <pre>{JSON.stringify(data, null, 2)}</pre>
+          </Box>
+        </CardBody>
+      </Card>
+    );
+  };
+
+  // Render summary cards for quick overview
+  const renderDataSummary = () => {
+    if (!sipdData || !sipdData.data) return null;
+
+    const { type, data } = sipdData;
+    
+    // For reference data, show basic info
+    if (type === 'reference') {
+      return (
+        <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} mt={4}>
+          <Card>
+            <CardBody>
+              <Flex align="center">
+                <Icon as={FiInfo} w={8} h={8} color="blue.500" />
+                <Box ml={3}>
+                  <Text fontWeight="bold">Data Referensi</Text>
+                  <Text fontSize="sm">Tipe data referensi</Text>
+                </Box>
+              </Flex>
+            </CardBody>
+          </Card>
+        </Grid>
+      );
+    }
+
+    // For final/regular data, try to extract summary info
+    if (data.data && Array.isArray(data.data)) {
+      const dataArray = data.data;
+      const totalDatasets = dataArray.length;
+      
+      // Try to get some statistics if possible
+      let publicDatasets = 0;
+      let privateDatasets = 0;
+      const themes = {};
+      const producers = {};
+      
+      dataArray.forEach(item => {
+        // Count public vs private datasets
+        if (item.publik && item.publik.toLowerCase() === 'ya') {
+          publicDatasets++;
+        } else if (item.publik) {
+          privateDatasets++;
+        }
+        
+        // Count datasets by theme
+        if (item.tema_dataset) {
+          themes[item.tema_dataset] = (themes[item.tema_dataset] || 0) + 1;
+        }
+        
+        // Count datasets by producer
+        if (item.produsen_data) {
+          producers[item.produsen_data] = (producers[item.produsen_data] || 0) + 1;
+        }
+      });
+
+      // Get the most common theme and producer
+      const mostCommonTheme = Object.keys(themes).reduce((a, b) => themes[a] > themes[b] ? a : b, '');
+      const mostCommonProducer = Object.keys(producers).reduce((a, b) => producers[a] > producers[b] ? a : b, '');
+
+      return (
+        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }} gap={4} mt={4}>
+          <Card>
+            <CardBody>
+              <Flex align="center">
+                <Icon as={FiDatabase} w={8} h={8} color="green.500" />
+                <Box ml={3}>
+                  <Text fontWeight="bold">{totalDatasets}</Text>
+                  <Text fontSize="sm">Total Dataset</Text>
+                </Box>
+              </Flex>
+            </CardBody>
+          </Card>
+          
+          <Card>
+            <CardBody>
+              <Flex align="center">
+                <Icon as={FiFileText} w={8} h={8} color="blue.500" />
+                <Box ml={3}>
+                  <Text fontWeight="bold">{publicDatasets}</Text>
+                  <Text fontSize="sm">Dataset Publik</Text>
+                </Box>
+              </Flex>
+            </CardBody>
+          </Card>
+          
+          <Card>
+            <CardBody>
+              <Flex align="center">
+                <Icon as={FiUser} w={8} h={8} color="orange.500" />
+                <Box ml={3}>
+                  <Text fontWeight="bold">{privateDatasets}</Text>
+                  <Text fontSize="sm">Dataset Private</Text>
+                </Box>
+              </Flex>
+            </CardBody>
+          </Card>
+          
+          <Card>
+            <CardBody>
+              <Flex align="center">
+                <Icon as={FiTag} w={8} h={8} color="purple.500" />
+                <Box ml={3}>
+                  <Text fontWeight="bold">{mostCommonTheme || 'N/A'}</Text>
+                  <Text fontSize="sm">Tema Terbanyak</Text>
+                </Box>
+              </Flex>
+            </CardBody>
+          </Card>
+        </Grid>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -292,14 +552,15 @@ const SipdIntegrationPanel = () => {
                 </Button>
               </HStack>
               
-              {sipdData && (
-                <Box borderWidth="1px" borderRadius="md" p={3} bg="gray.50">
-                  <Text fontWeight="bold" mb={2}>Data SIPD:</Text>
-                  <Box maxH="200px" overflowY="auto" fontFamily="mono" fontSize="xs">
-                    <pre>{JSON.stringify(sipdData, null, 2)}</pre>
-                  </Box>
-                </Box>
+              {isFetching && (
+                <Flex justify="center" align="center" py={4}>
+                  <Spinner size="lg" />
+                  <Text ml={3}>Mengambil data dari SIPD...</Text>
+                </Flex>
               )}
+              
+              {renderDataSummary()}
+              {renderSipdDataTable()}
               
               <Divider />
               
@@ -339,6 +600,17 @@ const SipdIntegrationPanel = () => {
               >
                 Kirim Permintaan Disable
               </Button>
+              
+              <Alert status="info" mt={4}>
+                <AlertIcon />
+                <Box>
+                  <AlertTitle>Informasi</AlertTitle>
+                  <AlertDescription>
+                    Gunakan fitur ini untuk menonaktifkan dataset di sistem SIPD E-Walidata. 
+                    Pastikan Anda memiliki otorisasi yang tepat sebelum mengirim permintaan.
+                  </AlertDescription>
+                </Box>
+              </Alert>
             </VStack>
           </TabPanel>
         </TabPanels>

@@ -13,12 +13,15 @@ import {
   useBreakpointValue,
   InputGroup,
   InputLeftElement,
+  Image,
+  HStack,
+  Flex,
 } from "@chakra-ui/react";
 import { MdLock } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 
-import "../../shared/dist/css/bootstrap.min.css";
 import CustomModal from "./components/CustomModal";
+import logoPali from "/pali.png";
 
 function Login() {
   const navigate = useNavigate();
@@ -65,83 +68,140 @@ function Login() {
       };
 
   return (
-    <Box
-      display="flex"
+    <Flex
+      minHeight="100vh"
+      width="full"
+      align="center"
       justifyContent="center"
-      alignItems="center"
-      height="100vh"
-      bg="gray.50"
+      bg="white"
+      p={4}
     >
       <Box
-        bg="white"
-        p={6}
-        borderRadius="md"
-        boxShadow="lg"
-        w={["90%", "550px"]}
-        boxSizing="border-box"
+        bg="green.500"
+        p={8}
+        borderRadius="2xl"
+        boxShadow="2xl"
+        width="100%"
+        maxWidth="450px"
+        textAlign="center"
       >
-        <VStack spacing={4} align="stretch">
-          <Heading size="lg" textAlign="center">
-            Masuk ke Satu Data PALI
-          </Heading>
+        {/* Logo and Title Section */}
+        <VStack spacing={6} mb={6}>
+          <HStack spacing={4} justify="center">
+            <Image 
+              src={logoPali} 
+              alt="Logo Satu Data PALI" 
+              height="10rem"
+              width="auto"
+            />
+          </HStack>
+          <Box>
+            <Heading as="h1" size="xl" color="white" fontWeight="bold">
+              SatuData PALI
+            </Heading>
+          </Box>
+        </VStack>
 
-          {error && <Text color="red.500" textAlign="center">{error}</Text>}
+        {/* Login Form */}
+        <Box as="form" onSubmit={handleSubmit}>
+          <VStack spacing={5} align="stretch">
+            {error && (
+              <Box 
+                bg="red.50" 
+                borderRadius="md" 
+                p={3} 
+                mb={4}
+              >
+                <Text color="red.500" fontSize="sm" textAlign="center">
+                  {error}
+                </Text>
+              </Box>
+            )}
 
-          <form onSubmit={handleSubmit}>
             <FormControl isRequired>
-              <FormLabel htmlFor="username">Username</FormLabel>
+              <FormLabel htmlFor="username" color="white" fontWeight="medium">
+                Username
+              </FormLabel>
               <InputGroup>
                 <InputLeftElement
                   pointerEvents="none"
-                  children={<FaUser color="gray.500" />}
+                  children={<FaUser color="green.500" />}
                 />
                 <Input
                   id="username"
                   type="text"
-                  placeholder="Enter your Username"
+                  placeholder="Masukkan username Anda"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  bg="white"
+                  borderRadius="lg"
+                  border="1px solid"
+                  borderColor="gray.300"
+                  _focus={{
+                    borderColor: "green.500",
+                    boxShadow: "0 0 0 1px green.500",
+                  }}
+                  py={6}
                 />
               </InputGroup>
             </FormControl>
 
-            <FormControl isRequired mt={4}>
-              <FormLabel htmlFor="password">Password</FormLabel>
+            <FormControl isRequired>
+              <FormLabel htmlFor="password" color="white" fontWeight="medium">
+                Password
+              </FormLabel>
               <InputGroup>
                 <InputLeftElement
                   pointerEvents="none"
-                  children={<MdLock color="gray.500" />}
+                  children={<MdLock color="green.500" />}
                 />
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="Masukkan password Anda"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  bg="white"
+                  borderRadius="lg"
+                  border="1px solid"
+                  borderColor="gray.300"
+                  _focus={{
+                    borderColor: "green.500",
+                    boxShadow: "0 0 0 1px green.500",
+                  }}
+                  py={6}
                 />
               </InputGroup>
             </FormControl>
 
             <Button
               type="submit"
-              colorScheme="blue"
-              w="full"
-              mt={6}
-              className="btn btn-primary"
+              bg="white"
+              color="green.500"
+              size="lg"
+              fontSize="md"
+              fontWeight="bold"
+              borderRadius="lg"
+              mt={4}
+              py={6}
+              _hover={{
+                bg: "green.100",
+                transform: "translateY(-2px)",
+                boxShadow: "lg"
+              }}
+              _active={{
+                transform: "translateY(0)",
+              }}
+              transition="all 0.3s ease"
+              boxShadow="md"
             >
-              Login
+              Masuk
             </Button>
-          </form>
-
-          <Box textAlign="center" mt={4}>
-            <Button onClick={HandleModalOpen} className="text-primary">
-              Belum Punya Akun?
-            </Button>
-          </Box>
-        </VStack>
+          </VStack>
+        </Box>
       </Box>
       <CustomModal isOpen={showModal} onClose={HandleModalClose} />
-    </Box>
+    </Flex>
   );
 }
 

@@ -1,152 +1,112 @@
-import React from "react";
-import {
-  Box,
-  Flex,
-  Link,
-  Text,
-  Stack,
-  Icon,
-  Divider,
-  Image,
-  HStack,
-} from "@chakra-ui/react";
-import { FaYoutube, FaInstagram, FaFacebook } from "react-icons/fa";
-import { BsBrowserChrome } from "react-icons/bs";
+import React from 'react';
+import { Box, Container, Stack, Text, Image, HStack, VStack, Divider, Link } from '@chakra-ui/react';
+import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaGlobe, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
+import logoPali from '/pali.png';
+import './footerStyle.css';
 
-import "./footerStyle.css";
-import "../../../index.css";
-
-function Footer() {
+const Footer = () => {
   return (
     <Box className="footer">
-      {/* Top Section */}
-      <Flex className="footer-top">
-        {/* Left Section */}
-        <Stack spacing={4} className="footer-section">
-          <HStack spacing={4}>
-            <Image src="/sdi2.png" alt="Logo" className="main-logo" />
-            <Image src="/diskominfo.png" alt="Logo" className="main-logo" />
-          </HStack>
-          <Text as="h6" className="footer-heading poppins-semibold">
-            DATA-Ku di PALI
-          </Text>
-          <Link href="#" className="footer-link">
-            Tentang
-          </Link>
-          <Link href="#" className="footer-link">
-            Ketentuan Penggunaan
-          </Link>
-          <Link href="#" className="footer-link">
-            Kebijakan Privasi
-          </Link>
-        </Stack>
+      <Container maxW="container.xl" py={10}>
+        <Stack 
+          direction={{ base: 'column', md: 'row' }} 
+          spacing={8} 
+          justify="space-between"
+          className="footer-top"
+        >
+          {/* Logo and Description */}
+          <VStack spacing={4} align="flex-start" className="footer-section">
+            <HStack>
+              <Image src={logoPali} boxSize="50px" alt="Logo PALI" className="main-logo" />
+              <Text fontSize="lg" fontWeight="bold" color="white" className="footer-logo-heading">
+                Satu Data PALI
+              </Text>
+            </HStack>
+            <Text fontSize="sm" className="footer-subtext">
+              Dikelola oleh Dinas Komunikasi dan Informatika,<br />
+              Statistik dan Persandian Kabupaten PALI.
+            </Text>
+          </VStack>
 
-        {/* Middle Right Section */}
-        <Stack spacing={4} className="footer-section">
-          <Text className="footer-heading poppins-semibold">
-            Telusuri Sumber Data Lainnya
-          </Text>
-          <Stack spacing={2}>
-            <Link 
-              as='a' 
-              href="https://sumsel.bps.go.id/id" 
-              target="_blank" 
-              className="footer-link"
-            >
-              BPS Sumsel
+          {/* Contact Information */}
+          <VStack spacing={2} align="flex-start" className="footer-section">
+            <Text fontWeight="bold" color="white" className="footer-heading">
+              Kontak Kami
+            </Text>
+            <HStack>
+              <FaMapMarkerAlt />
+              <Text fontSize="sm" className="footer-link">
+                Jl. Merdeka, Talang Ubi, PALI
+              </Text>
+            </HStack>
+            <HStack>
+              <FaPhone />
+              <Text fontSize="sm" className="footer-link">
+                (0713) XXX XXX
+              </Text>
+            </HStack>
+            <HStack>
+              <FaEnvelope />
+              <Text fontSize="sm" className="footer-link">
+                diskominfo@palikab.go.id
+              </Text>
+            </HStack>
+          </VStack>
+          
+          {/* Related Links */}
+          <VStack spacing={2} align="flex-start" className="footer-section">
+            <Text fontWeight="bold" color="white" className="footer-heading">
+              Tautan Terkait
+            </Text>
+            <Link href="#" fontSize="sm" className="footer-link">
+              Portal Pemkab PALI
             </Link>
-            <Link 
-              as='a' 
-              href="https://data.go.id/home" 
-              target="_blank" 
-              className="footer-link"
-            >
+            <Link href="#" fontSize="sm" className="footer-link">
               Satu Data Indonesia
             </Link>
-            <Link 
-              as='a' 
-              href="https://gis-pbb.palikab.go.id/" 
-              target="_blank" 
-              className="footer-link"
-            >
-              Satu Peta Pali
+            <Link href="#" fontSize="sm" className="footer-link">
+              Kementerian Kominfo
             </Link>
-          </Stack>
-        </Stack>
+            <Link href="#" fontSize="sm" className="footer-link">
+              BPS Kabupaten PALI
+            </Link>
+          </VStack>
 
-        {/* Right Section */}
-        <Stack spacing={4} className="footer-section">
-          <Text className="footer-heading poppins-semibold">
-            Ikuti Kami
-          </Text>
-          <Stack spacing={2}>
-            <Link 
-              as='a' 
-              href="https://instagram.com" 
-              target="_blank" 
-              className="footer-link"
-            >
-              Instagram
-            </Link>
-            <Link 
-              as='a' 
-              href="https://facebook.com" 
-              target="_blank" 
-              className="footer-link"
-            >
-              Facebook
-            </Link>
-            <Link 
-              as='a' 
-              href="https://youtube.com" 
-              target="_blank" 
-              className="footer-link"
-            >
-              YouTube
-            </Link>
-          </Stack>
-          
-          <HStack className="social-icons" mt={2}>
-            <Link 
-              as='a' 
-              href="https://facebook.com" 
-              target="_blank" 
-              className="social-icon"
-            >
-              <Icon as={FaFacebook} />
-            </Link>
-            <Link 
-              as='a' 
-              href="https://instagram.com" 
-              target="_blank" 
-              className="social-icon"
-            >
-              <Icon as={FaInstagram} />
-            </Link>
-            <Link 
-              as='a' 
-              href="https://youtube.com" 
-              target="_blank" 
-              className="social-icon"
-            >
-              <Icon as={FaYoutube} />
-            </Link>
-          </HStack>
+          {/* Social Media */}
+          <VStack spacing={2} align="flex-start" className="footer-section">
+            <Text fontWeight="bold" color="white" className="footer-heading">
+              Ikuti Kami
+            </Text>
+            <HStack className="social-icons">
+              <Link href="#" className="social-icon">
+                <FaFacebook />
+              </Link>
+              <Link href="#" className="social-icon">
+                <FaTwitter />
+              </Link>
+              <Link href="#" className="social-icon">
+                <FaInstagram />
+              </Link>
+              <Link href="#" className="social-icon">
+                <FaGlobe />
+              </Link>
+            </HStack>
+          </VStack>
         </Stack>
-      </Flex>
-
-      {/* Divider */}
+      </Container>
+      
       <Divider className="footer-divider" />
-
-      {/* Bottom Section */}
-      <Box className="footer-bottom">
+      
+      <Box py={4} className="footer-bottom">
         <Text className="footer-bottom-text">
-          © 2024 <strong>DISKOMINFOSTAPER Kab. PALI</strong>.
+          © {new Date().getFullYear()} Dinas Komunikasi dan Informatika Kabupaten PALI. All rights reserved.
         </Text>
-        <Text className="footer-bottom-text">Versi 1.0.0</Text>
+        <Text className="footer-bottom-text">
+          Support by <Link href="#" color="yellow.400" fontWeight="semibold">Kominfo PALI</Link>
+        </Text>
       </Box>
     </Box>
   );
-}
+};
 
 export default Footer;

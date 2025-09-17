@@ -12,7 +12,20 @@ import Login from "./pages/login/Login.jsx";
 import Detail from "./pages/open data/Detail.jsx";
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Dashboard from './pages/satudata/Dashboard.jsx';
+import PriorityData from './pages/priority-data/PriorityData.jsx';
 import { AuthProvider } from "./context/AuthContext.jsx";
+
+// Custom component to conditionally render Footer
+const ConditionalFooter = () => {
+  const location = useLocation();
+  
+  // Don't show footer on login page and dashboard
+  if (location.pathname.startsWith('/satudata')) {
+    return null;
+  }
+  
+  return <Footer />;
+};
 
 function App() {
   return (
@@ -25,6 +38,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/opendata" element={<OpenData />} />
               <Route path="/dataset/:id" element={<Detail />} />
+              <Route path="/prioritas" element={<PriorityData />} />
               <Route path="/satudata" element={<Login />} />
               <Route 
                 path="satudata/dashboard" 
@@ -34,7 +48,7 @@ function App() {
             />
             </Routes>
           </main>
-          <Footer />
+          <ConditionalFooter />
         </BrowserRouter>
       </AuthProvider>
     </>

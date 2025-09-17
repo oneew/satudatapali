@@ -33,20 +33,24 @@ import {
   FormLabel,
   Tooltip,
   Icon,
+  Flex,
 } from "@chakra-ui/react";
 import axios from "axios";
+// --- PERBAIKAN DI SINI ---
+import { GrView } from "react-icons/gr"; // Icon dari Grommet-Icons
 import { 
-  GrView, 
   FiRefreshCw, 
   FiDownload, 
   FiInfo,
   FiCheckCircle,
   FiXCircle,
-  FiClock
-} from "react-icons/fi";
-import { MdDeleteForever } from "react-icons/md";
-import { FaCheckCircle } from "react-icons/fa";
-import { FaUndoAlt } from "react-icons/fa";
+  FiClock,
+  FiEdit,
+  FiTrash2
+} from "react-icons/fi"; // Icon dari Feather Icons
+import { MdDeleteForever } from "react-icons/md"; // Icon dari Material Design
+import { FaCheckCircle, FaUndoAlt } from "react-icons/fa"; // Icon dari Font Awesome
+// --- AKHIR PERBAIKAN ---
 
 import React, { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
@@ -210,9 +214,9 @@ const AssetsTable = ({ files, onDelete }) => {
       // Simulate progress
       const interval = setInterval(() => {
         setSyncProgress(prev => Math.min(prev + 10, 90));
-      }, 200);
+      }, 300);
 
-      const response = await axios.post(`/v1/integration/sync/${fileId}`, 
+      const response = await axios.post(`/v1/integration/sync/${fileId}`,
         { targets: selectedSystems },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -245,62 +249,7 @@ const AssetsTable = ({ files, onDelete }) => {
     }
   };
 
-  const handleSyncAll = async () => {
-    if (selectedSystems.length === 0) {
-      toast({
-        title: 'Tidak ada sistem yang dipilih',
-        description: 'Silakan pilih setidaknya satu sistem untuk disinkronkan',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    setIsSyncing(true);
-    setSyncProgress(0);
-    setSyncResults(null);
-
-    try {
-      // Simulate progress
-      const interval = setInterval(() => {
-        setSyncProgress(prev => Math.min(prev + 5, 95));
-      }, 300);
-
-      const response = await axios.post(`/v1/integration/sync-all`,
-        { targets: selectedSystems, limit: 100 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      clearInterval(interval);
-      setSyncProgress(100);
-      
-      setSyncResults(response.data);
-      
-      toast({
-        title: response.data.success ? 'Sinkronisasi massal berhasil' : 'Sinkronisasi massal selesai dengan beberapa kesalahan',
-        description: response.data.message,
-        status: response.data.success ? 'success' : 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
-    } catch (error) {
-      clearInterval(interval);
-      setSyncProgress(0);
-      
-      toast({
-        title: 'Sinkronisasi massal gagal',
-        description: error.message || 'Terjadi kesalahan saat sinkronisasi massal',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  // SIPD specific functions
+  // Handle fetching data from SIPD
   const handleFetchSipdData = async (type) => {
     setIsFetching(true);
     setSipdData(null);
@@ -316,12 +265,13 @@ const AssetsTable = ({ files, onDelete }) => {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        response = await axios.get(`/v1/integration/fetch/sipd/data?kodepemda=${kodepemda}`, {
+        // For regular data, we'll use final data as default
+        response = await axios.get(`/v1/integration/sipd/final?kodepemda=${kodepemda}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
       
-      setSipdData(response.data);
+      setSipdData({ type, data: response.data });
       
       toast({
         title: 'Data berhasil diambil',
@@ -343,241 +293,324 @@ const AssetsTable = ({ files, onDelete }) => {
     }
   };
 
-  // Function to get status badge based on verification status
+  // Get status badge based on verification status
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Sudah Verifikasi':
-        return <Badge colorScheme="green" fontSize="0.8em"><Icon as={FiCheckCircle} mr={1} />Terverifikasi</Badge>;
-      case 'Ditolak':
-        return <Badge colorScheme="red" fontSize="0.8em"><Icon as={FiXCircle} mr={1} />Ditolak</Badge>;
+        return <Badge colorScheme="green">Terverifikasi</Badge>;
       case 'Belum Verifikasi':
+        return <Badge colorScheme="yellow">Belum Diverifikasi</Badge>;
+      case 'Ditolak':
+        return <Badge colorScheme="red">Ditolak</Badge>;
       default:
-        return <Badge colorScheme="yellow" fontSize="0.8em"><Icon as={FiClock} mr={1} />Menunggu</Badge>;
+        return <Badge colorScheme="gray">Unknown</Badge>;
     }
   };
 
-  const verifyData = async (id) => {};
+  // Get action buttons based on user role and file status
+  const getActionButtons = (file) => {
+    if (user.role === "Admin" || user.role === "admin") {
+      if (file.StatusVerifikasi === "Belum Verifikasi") {
+        return (
+          <Flex gap={2}>
+            <Tooltip label="Verifikasi" placement="top">
+              <IconButton
+                icon={<FiCheckCircle />}
+                colorScheme="green"
+                size="sm"
+                onClick={() => VerifyClicked(file._id)}
+                aria-label="Verifikasi"
+              />
+            </Tooltip>
+            <Tooltip label="Tolak" placement="top">
+              <IconButton
+                icon={<FiXCircle />}
+                colorScheme="red"
+                size="sm"
+                onClick={() => RejectClicked(file._id)}
+                aria-label="Tolak"
+              />
+            </Tooltip>
+            <Tooltip label="Edit" placement="top">
+              <IconButton
+                icon={<FiEdit />}
+                colorScheme="blue"
+                size="sm"
+                onClick={() => {
+                  // Implement edit functionality
+                }}
+                aria-label="Edit"
+              />
+            </Tooltip>
+            <Tooltip label="Hapus" placement="top">
+              <IconButton
+                icon={<FiTrash2 />}
+                colorScheme="red"
+                variant="outline"
+                size="sm"
+                onClick={() => DeleteClicked(file._id)}
+                aria-label="Hapus"
+              />
+            </Tooltip>
+            <Tooltip label="Download" placement="top">
+              <IconButton
+                icon={<FiDownload />}
+                colorScheme="teal"
+                size="sm"
+                onClick={() => downloadFile(file._id)}
+                aria-label="Download"
+              />
+            </Tooltip>
+          </Flex>
+        );
+      } else if (file.StatusVerifikasi === "Sudah Verifikasi") {
+        return (
+          <Flex gap={2}>
+            <Tooltip label="Download" placement="top">
+              <IconButton
+                icon={<FiDownload />}
+                colorScheme="teal"
+                size="sm"
+                onClick={() => downloadFile(file._id)}
+                aria-label="Download"
+              />
+            </Tooltip>
+            <Tooltip label="Sinkronisasi" placement="top">
+              <IconButton
+                icon={<FiRefreshCw />}
+                colorScheme="purple"
+                size="sm"
+                onClick={() => {
+                  setFileId(file._id);
+                  onIntegrationOpen();
+                }}
+                aria-label="Sinkronisasi"
+              />
+            </Tooltip>
+            <Tooltip label="Hapus" placement="top">
+              <IconButton
+                icon={<FiTrash2 />}
+                colorScheme="red"
+                variant="outline"
+                size="sm"
+                onClick={() => DeleteClicked(file._id)}
+                aria-label="Hapus"
+              />
+            </Tooltip>
+          </Flex>
+        );
+      } else {
+        return (
+          <Flex gap={2}>
+            <Tooltip label="Download" placement="top">
+              <IconButton
+                icon={<FiDownload />}
+                colorScheme="teal"
+                size="sm"
+                onClick={() => downloadFile(file._id)}
+                aria-label="Download"
+              />
+            </Tooltip>
+            <Tooltip label="Hapus" placement="top">
+              <IconButton
+                icon={<FiTrash2 />}
+                colorScheme="red"
+                variant="outline"
+                size="sm"
+                onClick={() => DeleteClicked(file._id)}
+                aria-label="Hapus"
+              />
+            </Tooltip>
+          </Flex>
+        );
+      }
+    } else if (user.role === "Operator") {
+      if (file.StatusVerifikasi === "Ditolak") {
+        return (
+          <Flex gap={2}>
+            <Tooltip label="Edit" placement="top">
+              <IconButton
+                icon={<FiEdit />}
+                colorScheme="blue"
+                size="sm"
+                onClick={() => {
+                  // Implement edit functionality
+                }}
+                aria-label="Edit"
+              />
+            </Tooltip>
+            <Tooltip label="Hapus" placement="top">
+              <IconButton
+                icon={<FiTrash2 />}
+                colorScheme="red"
+                variant="outline"
+                size="sm"
+                onClick={() => DeleteClicked(file._id)}
+                aria-label="Hapus"
+              />
+            </Tooltip>
+          </Flex>
+        );
+      } else {
+        return (
+          <Flex gap={2}>
+            <Tooltip label="Download" placement="top">
+              <IconButton
+                icon={<FiDownload />}
+                colorScheme="teal"
+                size="sm"
+                onClick={() => downloadFile(file._id)}
+                aria-label="Download"
+              />
+            </Tooltip>
+            <Tooltip label="Hapus" placement="top">
+              <IconButton
+                icon={<FiTrash2 />}
+                colorScheme="red"
+                variant="outline"
+                size="sm"
+                onClick={() => DeleteClicked(file._id)}
+                aria-label="Hapus"
+              />
+            </Tooltip>
+          </Flex>
+        );
+      }
+    }
+    return null;
+  };
 
   return (
-    <Box className="assets-table">
-      <Box mb={4} textAlign="right">
-        <Button 
-          leftIcon={<FiRefreshCw />} 
-          colorScheme="teal" 
-          onClick={handleSyncAll}
-          size="sm"
-          mr={2}
-        >
-          Sinkron Semua
-        </Button>
-        <Button 
-          leftIcon={<FiDownload />} 
-          colorScheme="blue" 
-          onClick={onIntegrationOpen}
-          size="sm"
-        >
-          Data SIPD
-        </Button>
-      </Box>
-      <Box overflowX="auto">
-        <Table variant="simple" size="sm">
-          <Thead>
-            <Tr>
-              <Th>Nama Data</Th>
-              <Th>Tipe File</Th>
-              <Th>Data Publik</Th>
-              <Th>Tanggal Unggah</Th>
-              {user.role === "Admin" ? (
-                <Th>Terakhir Diubah</Th>
-              ) : (
-                <Th>Status</Th>
-              )}
-              {user.role === "Admin" ||
-              user.role === "admin" ||
-              user.role === "Operator" ? (
-                <Th>Aksi</Th>
-              ) : user.role === "Validator" ? (
-                <>
-                  <Th>Verifikasi</Th>
-                  <Th>Tolak</Th>
-                </>
-              ) : null}
-              <Th>Lihat</Th>
-              {(user.role === "Admin" || user.role === "admin" || user.role === "Operator") && (
-                <Th>Integrasi</Th>
-              )}
+    <Box className="assets-table" overflowX="auto">
+      <Table variant="simple">
+        <Thead>
+          <Tr>
+            <Th>Nama File</Th>
+            <Th>Tema Dataset</Th>
+            <Th>Produsen</Th>
+            <Th>Tipe File</Th>
+            <Th>Status</Th>
+            <Th>Tanggal Upload</Th>
+            <Th>Aksi</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {files.map((file) => (
+            <Tr key={file._id}>
+              <Td>
+                <Text fontWeight="semibold">{file.name}</Text>
+                <Text fontSize="sm" color="gray.500">
+                  {file.filename}
+                </Text>
+              </Td>
+              <Td>{file.temadataset}</Td>
+              <Td>{file.metaData.produsen}</Td>
+              <Td>
+                <Badge colorScheme="blue">{file.fileType}</Badge>
+              </Td>
+              <Td>{getStatusBadge(file.StatusVerifikasi)}</Td>
+              <Td>
+                {new Date(file.metaData.createdAt).toLocaleDateString("id-ID", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </Td>
+              <Td className="action-buttons">
+                {getActionButtons(file)}
+              </Td>
             </Tr>
-          </Thead>
-          <Tbody>
-            {files.map((file) => (
-              <Tr key={file._id}>
-                <Td>
-                  <Text fontWeight="medium">{file.name}</Text>
-                  <Text fontSize="sm" color="gray.500">{file.temadataset}</Text>
-                </Td>
-                <Td>
-                  <Badge colorScheme="blue">{file.fileType}</Badge>
-                </Td>
-                <Td>
-                  {file.isPublic ? (
-                    <Badge colorScheme="green">Ya</Badge>
-                  ) : (
-                    <Badge colorScheme="red">Tidak</Badge>
-                  )}
-                </Td>
-                <Td>
-                  {new Date(file.metaData.createdAt).toLocaleDateString("id", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </Td>
-                {user.role === "Admin" ? (
-                  <Td>
-                    {new Date(file.metaData.updatedAt).toLocaleDateString("id", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </Td>
-                ) : (
-                  <Td>{getStatusBadge(file.StatusVerifikasi)}</Td>
-                )}
-                {user.role === "Admin" ||
-                user.role === "admin" ||
-                user.role === "Operator" ? (
-                  <Td>
-                    <IconButton
-                      icon={<MdDeleteForever />}
-                      colorScheme="red"
-                      size="sm"
-                      onClick={() => DeleteClicked(file._id)}
-                      aria-label="Hapus file"
-                    />
-                  </Td>
-                ) : (
-                  <>
-                    <Td>
-                      <IconButton
-                        icon={<FaCheckCircle />}
-                        colorScheme="green"
-                        size="sm"
-                        onClick={() => VerifyClicked(file._id)}
-                        aria-label="Verifikasi data"
-                      />
-                    </Td>
-                    <Td>
-                      <IconButton
-                        icon={<FaUndoAlt />}
-                        colorScheme="red"
-                        size="sm"
-                        onClick={() => RejectClicked(file._id)}
-                        aria-label="Tolak data"
-                      />
-                    </Td>
-                  </>
-                )}
-                <Td>
-                  <Tooltip label="Lihat file" placement="top">
-                    <IconButton
-                      icon={<GrView />}
-                      colorScheme="gray"
-                      size="sm"
-                      onClick={() => downloadFile(file._id)}
-                      aria-label="Lihat file"
-                    />
-                  </Tooltip>
-                </Td>
-                {(user.role === "Admin" || user.role === "admin" || user.role === "Operator") && (
-                  <Td>
-                    <Tooltip label="Integrasi data" placement="top">
-                      <IconButton
-                        icon={<FiRefreshCw />}
-                        colorScheme="teal"
-                        size="sm"
-                        onClick={() => {
-                          setFileId(file._id);
-                          onIntegrationOpen();
-                        }}
-                        aria-label="Integrasi data"
-                      />
-                    </Tooltip>
-                  </Td>
-                )}
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+          ))}
+        </Tbody>
+      </Table>
+
+      {/* Alert Modal */}
       <CustomAlert
-        onClose={onClose}
         isOpen={isOpen}
-        onDelete={handleDelete}
-        onVerify={handleVerify}
-        onReject={handleReject}
-        DialogBody={dialogbody}
-        DialogHeader={dialogheader}
+        onClose={onClose}
+        dialogbody={dialogbody}
+        dialogheader={dialogheader}
+        onConfirm={
+          dialogheader === "Hapus Data"
+            ? handleDelete
+            : dialogheader === "Verifikasi Data"
+            ? handleVerify
+            : handleReject
+        }
       />
-      
+
       {/* Integration Modal */}
       <Modal isOpen={isIntegrationOpen} onClose={onIntegrationClose} size="xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Integrasi Data</ModalHeader>
+          <ModalHeader>Sinkronisasi Data</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            <Tabs>
-              <TabList>
+            <Tabs variant="enclosed">
+              <TabList mb="1em">
                 <Tab>Sinkronisasi</Tab>
                 <Tab>Operasi SIPD</Tab>
               </TabList>
               <TabPanels>
+                {/* Sinkronisasi Panel */}
                 <TabPanel>
-                  {isSyncing ? (
-                    <VStack spacing={4}>
-                      <Text>Sedang menyinkronkan...</Text>
-                      <Progress value={syncProgress} hasStripe isAnimated width="100%" colorScheme="teal" />
-                      <Spinner color="teal.500" />
-                    </VStack>
-                  ) : syncResults ? (
-                    <VStack spacing={4} align="start">
-                      <Text fontWeight="bold">{syncResults.message}</Text>
-                      {syncResults.results && syncResults.results.map((result, index) => (
-                        <Box key={index} p={3} borderWidth="1px" borderRadius="md" width="100%" bg={result.success ? "green.50" : "red.50"}>
-                          <Text fontWeight="semibold">{result.system.toUpperCase()}:</Text>
-                          <Text>{result.message}</Text>
-                          {!result.success && (
-                            <Text color="red.500" fontSize="sm" mt={1}>Error: {result.error}</Text>
-                          )}
-                        </Box>
-                      ))}
-                      <Button onClick={() => setSyncResults(null)} colorScheme="teal">Sinkron File Lain</Button>
-                    </VStack>
-                  ) : (
-                    <VStack spacing={4} align="start">
-                      <Text>Pilih sistem target untuk sinkronisasi:</Text>
-                      <CheckboxGroup 
-                        value={selectedSystems} 
-                        onChange={setSelectedSystems}
-                      >
-                        <VStack align="start">
-                          <Checkbox value="splp">SPLP Satu Data Indonesia</Checkbox>
-                          <Checkbox value="sipd">SIPD e-walidata</Checkbox>
-                        </VStack>
-                      </CheckboxGroup>
+                  <VStack spacing={4} align="stretch">
+                    <Text>
+                      Pilih sistem eksternal untuk menyinkronkan file ini:
+                    </Text>
+                    
+                    <CheckboxGroup 
+                      value={selectedSystems} 
+                      onChange={setSelectedSystems}
+                    >
+                      <VStack align="start" spacing={2}>
+                        <Checkbox value="splp">SPLP Satu Data Indonesia</Checkbox>
+                        <Checkbox value="sipd">SIPD E-Walidata</Checkbox>
+                      </VStack>
+                    </CheckboxGroup>
+                    
+                    {isSyncing ? (
+                      <VStack spacing={4}>
+                        <Text>Sedang menyinkronkan...</Text>
+                        <Progress value={syncProgress} hasStripe isAnimated width="100%" colorScheme="teal" />
+                      </VStack>
+                    ) : syncResults ? (
+                      <Box p={4} bg={syncResults.success ? "green.50" : "red.50"} borderRadius="md">
+                        <Text fontWeight="bold" color={syncResults.success ? "green.700" : "red.700"}>
+                          {syncResults.success ? "Sinkronisasi Berhasil!" : "Sinkronisasi Gagal!"}
+                        </Text>
+                        <Text mt={2}>{syncResults.message}</Text>
+                        {syncResults.results && (
+                          <Box mt={2}>
+                            <Text fontWeight="semibold">Detail:</Text>
+                            {syncResults.results.map((result, index) => (
+                              <Box key={index} p={2} my={1} borderWidth="1px" borderRadius="md" bg={result.success ? "green.100" : "red.100"}>
+                                <Text fontWeight="medium">{result.system?.toUpperCase() || 'SISTEM'}</Text>
+                                <Text fontSize="sm">{result.message}</Text>
+                                {result.error && (
+                                  <Text color="red.700" fontSize="xs">Error: {result.error}</Text>
+                                )}
+                              </Box>
+                            ))}
+                          </Box>
+                        )}
+                      </Box>
+                    ) : (
                       <Button 
                         leftIcon={<FiRefreshCw />}
                         colorScheme="teal" 
                         onClick={() => handleSyncSingle(fileId)}
-                        isDisabled={selectedSystems.length === 0}
+                        width="100%"
                       >
-                        Sinkron File Ini
+                        Sinkron File dengan Sistem Eksternal
                       </Button>
-                    </VStack>
-                  )}
+                    )}
+                  </VStack>
                 </TabPanel>
+                
+                {/* Operasi SIPD Panel */}
                 <TabPanel>
-                  <VStack spacing={4} align="start">
+                  <VStack spacing={4} align="stretch">
                     <FormControl>
                       <FormLabel>Kode Pemda</FormLabel>
                       <Input 
@@ -587,16 +620,16 @@ const AssetsTable = ({ files, onDelete }) => {
                       />
                     </FormControl>
                     
-                    <VStack spacing={2} width="100%">
+                    <Flex gap={2} wrap="wrap">
                       <Button 
                         leftIcon={<FiDownload />}
                         colorScheme="blue" 
                         onClick={() => handleFetchSipdData('regular')}
                         isLoading={isFetching}
                         loadingText="Mengambil"
-                        width="100%"
+                        size="sm"
                       >
-                        Ambil Data SIPD
+                        Data SIPD
                       </Button>
                       <Button 
                         leftIcon={<FiCheckCircle />}
@@ -604,9 +637,9 @@ const AssetsTable = ({ files, onDelete }) => {
                         onClick={() => handleFetchSipdData('final')}
                         isLoading={isFetching}
                         loadingText="Mengambil"
-                        width="100%"
+                        size="sm"
                       >
-                        Ambil Data Final
+                        Data Final
                       </Button>
                       <Button 
                         leftIcon={<FiInfo />}
@@ -614,16 +647,30 @@ const AssetsTable = ({ files, onDelete }) => {
                         onClick={() => handleFetchSipdData('reference')}
                         isLoading={isFetching}
                         loadingText="Mengambil"
-                        width="100%"
+                        size="sm"
                       >
-                        Ambil Data Referensi
+                        Data Referensi
                       </Button>
-                    </VStack>
+                    </Flex>
+                    
+                    {isFetching && (
+                      <Flex justify="center" align="center" py={4}>
+                        <Spinner size="lg" />
+                        <Text ml={3}>Mengambil data dari SIPD...</Text>
+                      </Flex>
+                    )}
                     
                     {sipdData && (
-                      <Box borderWidth="1px" borderRadius="md" p={3} width="100%" bg="gray.50">
-                        <Text fontWeight="bold" mb={2}>Data SIPD:</Text>
-                        <Text fontSize="sm" whiteSpace="pre-wrap">{JSON.stringify(sipdData, null, 2)}</Text>
+                      <Box mt={4}>
+                        <Text fontWeight="bold" mb={2}>
+                          {sipdData.type === 'final' ? 'Data Final SIPD' : 
+                           sipdData.type === 'reference' ? 'Data Referensi SIPD' : 'Data SIPD'}
+                        </Text>
+                        <Box maxH="200px" overflowY="auto" p={2} borderWidth="1px" borderRadius="md" bg="gray.50">
+                          <pre style={{ fontSize: '0.8em' }}>
+                            {JSON.stringify(sipdData.data, null, 2)}
+                          </pre>
+                        </Box>
                       </Box>
                     )}
                   </VStack>
