@@ -1,456 +1,121 @@
-import React, { useState, useEffect } from "react";
+// frontend/src/pages/satudata/Dashboard.jsx (Modern Clean UI)
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../../context/AuthContext';
+import useDashboardData from '../../hooks/useDashboardData';
 import {
-  Box,
-  Grid,
-  Text,
-  Heading,
-  useToast,
-  Flex,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  IconButton,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Drawer,
-  DrawerBody,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  useDisclosure,
-  Button,
-  Container,
-  Select,
-  FormControl,
-  FormLabel,
-} from "@chakra-ui/react";
-import { SearchIcon, HamburgerIcon } from "@chakra-ui/icons";
-import axios from "axios";
-import { useAuth } from "../../context/AuthContext";
+  Upload, UserPlus, Users, FileCheck2, FileX2, FileClock,
+  Database, DatabaseZap
+} from 'lucide-react';
 
-import "./Dashboard.css";
+import LogoutButton from './components/LogoutButton';
+import QuickAccessCard from './components/QuickAccessCard';
+import UploadData from './components/UploadData';
+import RegisterUser from './components/RegisterUser';
+import DeleteUser from './components/DeleteUser';
+import AssetsTable from './components/AssetsTable';
+import SIPDIntegration from './components/SIPDIntegration';
 
-import LogoutButton from "./components/LogoutButton";
-import QuickAccessCard from "./components/QuickAccessCard";
-import AssetsTable from "./components/AssetsTable";
-import CustomModal from "./components/CustomModal";
-import RegisterUser from "./components/RegisterUser";
-import DeleteUser from "./components/DeleteUser";
-import UploadData from "./components/UploadData";
-import EditFile from "./components/EditFile";
-import SipdIntegrationPanel from "./components/SipdIntegrationPanel";
-import Sidebar from "./components/Sidebar";
-import DataSummary from "./components/DataSummary";
-import SipdDataDisplay from "./components/SipdDataDisplay";
+function Dashboard() {
+  const { user, role } = useContext(AuthContext);
+  const { stats, loading } = useDashboardData();
+  const [activeModal, setActiveModal] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-const Dashboard = () => {
-  const { user, token } = useAuth();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState({ title: "", body: null });
-  const [files, setFiles] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedPerangkatDaerah, setSelectedPerangkatDaerah] = useState("");
-  const [perangkatDaerahOptions, setPerangkatDaerahOptions] = useState([]);
-  const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const safeStats = stats || { totalFiles: 0, verified: 0, rejected: 0, pending: 0 };
 
-  // Extract unique years from files
-  const getUniqueYears = (files) => {
-    const years = files.map(file => {
-      if (file.metaData && file.metaData.createdAt) {
-        return new Date(file.metaData.createdAt).getFullYear();
-      }
-      return null;
-    }).filter(year => year !== null);
-    
-    // Remove duplicates and sort
-    return [...new Set(years)].sort((a, b) => b - a);
+  const openModal = (modalName) => setActiveModal(modalName);
+  const closeModal = () => setActiveModal(null);
+
+  const getSidebarMenu = () => {
+    const baseMenu = [
+      { name: 'Upload Data', icon: Upload, modal: 'upload', roles: ['operator', 'admin'] }
+    ];
+    const adminMenu = [
+      { name: 'Registrasi User', icon: UserPlus, modal: 'register', roles: ['admin'] },
+      { name: 'Manajemen User', icon: Users, modal: 'deleteUser', roles: ['admin'] }
+    ];
+    return role === 'admin' ? [...baseMenu, ...adminMenu] : baseMenu;
   };
 
-  // Extract unique perangkat daerah from files
-  const getUniquePerangkatDaerah = (files) => {
-    const perangkatDaerah = files.map(file => {
-      if (file.metaData && file.metaData.produsen) {
-        return file.metaData.produsen;
-      }
-      return null;
-    }).filter(pd => pd !== null);
-    
-    // Remove duplicates
-    return [...new Set(perangkatDaerah)];
-  };
-
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await axios.get("/v1/dashboard/files", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setFiles(response.data);
-        
-        // Set perangkat daerah options
-        const uniquePerangkatDaerah = getUniquePerangkatDaerah(response.data);
-        setPerangkatDaerahOptions(uniquePerangkatDaerah);
-      } catch (err) {
-        console.error("Error fetching files", err);
-        toast({
-          title: "Error fetching files",
-          description: "Failed to load files. Please try again.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-    };
-
-    fetchFiles();
-  }, [token, toast]);
-
-  const handleOpenModal = (title, body) => {
-    setModalContent({ title, body });
-    setIsModalOpen(true);
-  };
-  
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleDelete = async (fileId) => {
-    try {
-      const response = await axios.delete(`/v1/files/delete/${fileId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      if (response.status === 200) {
-        // Remove the deleted file from the state
-        setFiles(files.filter(file => file._id !== fileId));
-        
-        toast({
-          title: "File deleted successfully",
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        });
-      } else {
-        throw new Error("Failed to delete file");
-      }
-    } catch (error) {
-      toast({
-        title: "Error deleting file",
-        description: error.message || "Failed to delete file. Please try again.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleYearChange = (event) => {
-    setSelectedYear(event.target.value);
-  };
-
-  const handlePerangkatDaerahChange = (event) => {
-    setSelectedPerangkatDaerah(event.target.value);
-  };
-
-  const clearFilters = () => {
-    setSearchTerm("");
-    setSelectedYear("");
-    setSelectedPerangkatDaerah("");
-  };
-
-  // Filter files based on search term, year, and perangkat daerah
-  const filteredFiles = files.filter(file => {
-    // Search filter
-    const matchesSearch = !searchTerm || 
-      file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      file.temadataset.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (file.metaData && file.metaData.produsen && 
-       file.metaData.produsen.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    // Year filter
-    const fileYear = file.metaData && file.metaData.createdAt ? 
-      new Date(file.metaData.createdAt).getFullYear() : null;
-    const matchesYear = !selectedYear || fileYear == selectedYear;
-    
-    // Perangkat daerah filter
-    const filePerangkatDaerah = file.metaData && file.metaData.produsen ? 
-      file.metaData.produsen : null;
-    const matchesPerangkatDaerah = !selectedPerangkatDaerah || 
-      filePerangkatDaerah === selectedPerangkatDaerah;
-    
-    return matchesSearch && matchesYear && matchesPerangkatDaerah;
-  });
-
-  // Get unique years for the year filter dropdown
-  const uniqueYears = getUniqueYears(files);
+  const sidebarMenu = getSidebarMenu();
 
   return (
-    <Flex minH="100vh" bg="gray.50">
-      {/* Sidebar for larger screens */}
-      <Box display={{ base: 'none', md: 'block' }} w="240px" flexShrink={0}>
-        <Sidebar />
-      </Box>
-      
-      {/* Mobile menu button */}
-      <IconButton
-        display={{ base: 'flex', md: 'none' }}
-        aria-label="Open menu"
-        icon={<HamburgerIcon />}
-        onClick={onOpen}
-        position="fixed"
-        top="20px"
-        left="20px"
-        zIndex="1000"
-        colorScheme="teal"
-        borderRadius="full"
-        boxShadow="md"
-      />
-      
-      {/* Mobile sidebar drawer */}
-      <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
-        <DrawerOverlay />
-        <DrawerContent maxW="240px">
-          <DrawerCloseButton />
-          <DrawerHeader>
-            <Flex alignItems="center">
-              <Box
-                bg="teal.500"
-                borderRadius="md"
-                p={2}
-                mr={3}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Text fontSize="lg" fontWeight="bold" color="white">
-                  SD
-                </Text>
-              </Box>
-              <Text>Admin Panel</Text>
-            </Flex>
-          </DrawerHeader>
-          <DrawerBody p={0}>
-            <Sidebar />
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
-      
-      {/* Main content */}
-      <Box 
-        flex="1" 
-        ml={{ base: 0, md: "240px" }} 
-        mt={{ base: "60px", md: 0 }}
-        bg="gray.50"
-        minH="100vh"
-        transition="margin 0.3s ease"
-      >
-        <Box 
-          bg="white" 
-          boxShadow="sm" 
-          py={4} 
-          px={6}
-          position="sticky"
-          top="0"
-          zIndex="999"
-        >
-          <Flex 
-            justify="space-between" 
-            align="center" 
-            flexWrap="wrap"
-            gap={4}
-          >
-            <Heading as="h1" size="lg" color="teal.600">
-              Dashboard Admin
-            </Heading>
-            
-            <Flex align="center" gap={4}>
-              <Box textAlign="left"> 
-                <Text fontWeight="semibold" color="gray.700">
-                  {user.user}
-                </Text>
-                <Text fontSize="sm" color="gray.500">
-                  {user.role === "Admin" || user.role === "admin" ? "Administrator" : "Operator"}
-                </Text>
-              </Box>
-              <LogoutButton />
-            </Flex>
-          </Flex>
-        </Box>
-
-        <Container maxW="container.xl" py={6}>
-          {/* Quick Access Section */}
-          <Box mb={8}>
-            <Heading as="h2" size="md" mb={4} color="gray.700">
-              Akses Cepat
-            </Heading>
-            <Grid
-              templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }}
-              gap={6}
+    <div className="flex h-screen bg-gray-50 font-sans">
+      {/* Sidebar */}
+      <aside className={`bg-white shadow-lg ${isSidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 flex flex-col`}>
+        <div className="flex items-center justify-center h-20 border-b">
+          <DatabaseZap className="h-8 w-8 text-blue-500" />
+          {isSidebarOpen && <span className="ml-3 text-xl font-bold text-gray-800">Satu Data</span>}
+        </div>
+        <nav className="flex-grow px-3 py-6 space-y-2">
+          {sidebarMenu.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => openModal(item.modal)}
+              className="w-full flex items-center px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all"
             >
-              {user.role === "Admin" || user.role === "admin" ? (
-                <>
-                  <QuickAccessCard
-                    title="Daftar Pengguna"
-                    details="Klik untuk menghapus pengguna dari sistem"
-                    onOpen={() => handleOpenModal("Hapus Pengguna", <DeleteUser />)}
-                  />
-                  <QuickAccessCard
-                    title="Tambah Pengguna"
-                    details="Klik untuk menambahkan pengguna baru"
-                    onOpen={() => handleOpenModal("Daftar Pengguna", <RegisterUser />)}
-                  />
-                </>
-              ) : null}
-              
-              {user.role === "Operator" && (
-                <>
-                  <QuickAccessCard
-                    title="Edit Data"
-                    details="Klik untuk mengubah data yang ada di server"
-                    onOpen={() => handleOpenModal("Edit Data", <EditFile />)}
-                  />
-                  <QuickAccessCard
-                    title="Unggah Data"
-                    details="Klik untuk mengunggah data baru ke server"
-                    onOpen={() => handleOpenModal("Unggah Data", <UploadData />)}
-                  />
-                </>
-              )}
-            </Grid>
-          </Box>
+              <item.icon className="h-6 w-6" />
+              {isSidebarOpen && <span className="ml-3 font-medium">{item.name}</span>}
+            </button>
+          ))}
+        </nav>
+        <div className="px-4 py-4 border-t">
+          <LogoutButton isSidebarOpen={isSidebarOpen} />
+        </div>
+      </aside>
 
-          {/* SIPD Integration Panel for Admin */}
-          {(user.role === "Admin" || user.role === "admin") && (
-            <Box mb={8}>
-              <Heading as="h2" size="md" mb={4} color="gray.700">
-                Integrasi SIPD
-              </Heading>
-              <Box bg="white" borderRadius="lg" boxShadow="sm" border="1px" borderColor="gray.200">
-                <Accordion defaultIndex={[0]} allowMultiple>
-                  <AccordionItem border="none">
-                    <h2>
-                      <AccordionButton 
-                        py={4} 
-                        px={6} 
-                        _hover={{ bg: "teal.50" }}
-                        borderRadius="lg"
-                      >
-                        <Box flex="1" textAlign="left">
-                          <Text fontSize="lg" fontWeight="bold">Panel Integrasi SIPD</Text>
-                        </Box>
-                        <AccordionIcon />
-                      </AccordionButton>
-                    </h2>
-                    <AccordionPanel pb={6} px={6}>
-                      <SipdIntegrationPanel />
-                    </AccordionPanel>
-                  </AccordionItem>
-                </Accordion>
-              </Box>
-            </Box>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="flex items-center justify-between p-4 bg-white shadow-sm">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="text-gray-600 hover:text-gray-900 focus:outline-none"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                 xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                                         d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div className="flex items-center space-x-3">
+            <span className="hidden sm:block font-medium text-gray-700">Selamat datang, {user}!</span>
+            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold shadow">
+              {user?.charAt(0).toUpperCase()}
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-8">
+          <h1 className="text-2xl font-bold text-gray-800 mb-8">Dashboard Overview</h1>
+
+          {/* Quick Access Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <QuickAccessCard title="Total Data" value={loading ? '...' : safeStats.totalFiles} icon={Database} color="blue" />
+            <QuickAccessCard title="Sudah Verifikasi" value={loading ? '...' : safeStats.verified} icon={FileCheck2} color="green" />
+            <QuickAccessCard title="Ditolak" value={loading ? '...' : safeStats.rejected} icon={FileX2} color="red" />
+            <QuickAccessCard title="Belum Verifikasi" value={loading ? '...' : safeStats.pending} icon={FileClock} color="yellow" />
+          </div>
+
+          {/* Integrasi SIPD (Admin Only) */}
+          {role === 'admin' && (
+            <div className="mb-12">
+              <SIPDIntegration />
+            </div>
           )}
 
-          {/* Data Summary Visualization */}
-          <Box mb={8}>
-            <DataSummary files={filteredFiles} />
-          </Box>
+          {/* Data Aset Table */}
+          <div className="bg-white rounded-2xl shadow p-6">
+            <AssetsTable />
+          </div>
+        </main>
+      </div>
 
-          {/* SIPD Data Display */}
-          <Box mb={8}>
-            <SipdDataDisplay />
-          </Box>
-
-          <CustomModal
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-            content={modalContent}
-          />
-
-          {/* Assets Table with Filters */}
-          <Box>
-            <Flex justify="space-between" align="center" mb={4}>
-              <Heading as="h2" size="md" color="gray.700">
-                Data File
-              </Heading>
-              <Button size="sm" onClick={clearFilters} colorScheme="teal" variant="outline">
-                Bersihkan Filter
-              </Button>
-            </Flex>
-            
-            {/* Filter Controls */}
-            <Box bg="white" borderRadius="lg" boxShadow="sm" border="1px" borderColor="gray.200" p={4} mb={4}>
-              <Grid 
-                templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }} 
-                gap={4}
-              >
-                <FormControl>
-                  <FormLabel fontSize="sm">Tahun</FormLabel>
-                  <Select 
-                    placeholder="Pilih Tahun" 
-                    value={selectedYear}
-                    onChange={handleYearChange}
-                  >
-                    {uniqueYears.map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </Select>
-                </FormControl>
-                
-                <FormControl>
-                  <FormLabel fontSize="sm">Perangkat Daerah</FormLabel>
-                  <Select 
-                    placeholder="Pilih Perangkat Daerah" 
-                    value={selectedPerangkatDaerah}
-                    onChange={handlePerangkatDaerahChange}
-                  >
-                    {perangkatDaerahOptions.map(pd => (
-                      <option key={pd} value={pd}>{pd}</option>
-                    ))}
-                  </Select>
-                </FormControl>
-                
-                <FormControl gridColumn={{ base: "span 2", md: "span 2" }}>
-                  <FormLabel fontSize="sm">Cari Data</FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <SearchIcon color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      placeholder="Cari berdasarkan nama, tema, atau produsen..."
-                      value={searchTerm}
-                      onChange={handleSearch}
-                    />
-                  </InputGroup>
-                </FormControl>
-              </Grid>
-            </Box>
-            
-            {/* Results Info */}
-            <Text fontSize="sm" color="gray.600" mb={4}>
-              Menampilkan {filteredFiles.length} dari {files.length} data
-            </Text>
-            
-            {/* Assets Table */}
-            <Box bg="white" borderRadius="lg" boxShadow="sm" border="1px" borderColor="gray.200" p={2}>
-              <AssetsTable files={filteredFiles} onDelete={handleDelete} />
-            </Box>
-          </Box>
-        </Container>
-      </Box>
-    </Flex>
+      {/* Modals */}
+      {activeModal === 'upload' && <UploadData show={true} handleClose={closeModal} />}
+      {activeModal === 'register' && <RegisterUser show={true} handleClose={closeModal} />}
+      {activeModal === 'deleteUser' && <DeleteUser show={true} handleClose={closeModal} />}
+    </div>
   );
-};
+}
 
 export default Dashboard;

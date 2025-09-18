@@ -1,122 +1,101 @@
-import React from 'react';
-import { NavLink, useLocation, Link } from 'react-router-dom';
-import { Box, Flex, Button, Image, HStack, Container, IconButton, useDisclosure, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, VStack } from '@chakra-ui/react';
-import { HamburgerIcon } from '@chakra-ui/icons';
-import logoPali from '/pali.png';
-import './headerStyle.css';
+// frontend/src/shared/components/header/header.jsx (Revised)
+import React, { useState } from 'react';
+import { NavLink, Link } from 'react-router-dom';
+import sdiLogo from '/SDINDO.png';
+import paliLogo from '/pali.png';
+import { Menu, X } from 'lucide-react'; 
 
-const Header = () => {
-  const location = useLocation();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+const navLinks = [
+    { name: 'Beranda', path: '/' },
+    { name: 'Dataset', path: '/opendata' },
+    { name: 'Metadata', path: '/Metadata' },
+    { name: 'Info Grafis', path: '/Grafis' },
+    { name: 'Diseminasi', path: '/Diseminasi' },
+];
 
-  if (location.pathname.startsWith('/satudata')) {
-    return null;
-  }
+function Header() {
+    const [isOpen, setIsOpen] = useState(false);
 
-  const navLinks = [
-    { to: '/', label: 'Beranda' },
-    { to: '/opendata', label: 'Data' },
-    { to: '/instansi', label: 'Instansi' },
-    { to: '/prioritas', label: 'Data Prioritas' },
-    { to: '/rencana-aksi', label: 'Rencana Aksi' }
-  ];
+    return (
+        <header className="bg-white shadow-sm sticky top-0 z-50">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-20">
+                    {/* Logo */}
+                    <div className="flex-shrink-0">
+                        <Link to="/" className="flex items-center space-x-3">
+                            <img src={sdiLogo} alt="Satu Data Indonesia" className="h-12 w-auto" />
+                            <img src={paliLogo} alt="Logo PALI" className="h-12 w-auto" />
+                            <div className="hidden sm:block">
+                                <span className="block text-base font-bold text-gray-800 leading-tight">Satu Data</span>
+                                <span className="block text-xs font-bold text-gray-500 leading-tight">PALI</span>
+                            </div>
+                        </Link>
+                    </div>
 
-  return (
-    <Box
-      bg="white"
-      py={3}
-      px={{ base: 4, md: 8 }}
-      boxShadow="sm"
-      position="sticky"
-      top="0"
-      zIndex="1100"
-    >
-      <Container maxW="container.xl">
-        <Flex alignItems="center" justifyContent="space-between">
-          {/* Logo */}
-          <Link to="/">
-            <HStack>
-              <Image src={logoPali} alt="Logo Satu Data PALI" boxSize="45px" />
-              <Box fontWeight="bold" fontSize="lg" color="teal.700">
-                Satu Data PALI
-              </Box>
-            </HStack>
-          </Link>
+                    {/* Navigasi Desktop */}
+                    <nav className="hidden lg:flex items-center space-x-8">
+                        {navLinks.map((link) => (
+                            <NavLink
+                                key={link.name}
+                                to={link.path}
+                                className={({ isActive }) =>
+                                    `text-base font-medium transition-colors duration-200 pb-1 border-b-2 ${
+                                        isActive ? 'text-green-600 border-green-600' : 'text-gray-600 hover:text-green-600 border-transparent'
+                                    }`
+                                }
+                            >
+                                {link.name}
+                            </NavLink>
+                        ))}
+                    </nav>
 
-          {/* Desktop Navigation */}
-          <HStack as="nav" spacing={{ base: 4, md: 6 }} display={{ base: 'none', md: 'flex' }}>
-            {navLinks.map((link) => (
-              <NavLink 
-                key={link.to} 
-                to={link.to} 
-                className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </HStack>
+                    {/* Tombol Login dan Menu Mobile */}
+                    <div className="flex items-center">
+                        <Link
+                            to="/login"
+                            className="hidden lg:inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors"
+                        >
+                            Login
+                        </Link>
+                        <div className="lg:hidden ml-4">
+                            <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-green-600">
+                                {isOpen ? <X size={28} /> : <Menu size={28} />}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-          {/* Mobile Navigation Button */}
-          <IconButton
-            display={{ base: 'flex', md: 'none' }}
-            aria-label="Open menu"
-            icon={<HamburgerIcon />}
-            onClick={onOpen}
-            variant="ghost"
-            color="teal.700"
-          />
-
-          {/* Login Button */}
-          <Link to="/satudata">
-            <Button 
-              colorScheme="teal" 
-              variant="solid" 
-              size="sm"
-              display={{ base: 'none', md: 'flex' }}
-            >
-              Masuk
-            </Button>
-          </Link>
-        </Flex>
-      </Container>
-
-      {/* Mobile Drawer */}
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader>
-            <HStack>
-              <Image src={logoPali} alt="Logo Satu Data PALI" boxSize="40px" />
-              <Box fontWeight="bold" fontSize="lg" color="teal.700">
-                Satu Data PALI
-              </Box>
-            </HStack>
-          </DrawerHeader>
-
-          <DrawerBody>
-            <VStack align="stretch" spacing={4}>
-              {navLinks.map((link) => (
-                <NavLink 
-                  key={link.to} 
-                  to={link.to} 
-                  className={({ isActive }) => (isActive ? 'nav-link active mobile' : 'nav-link mobile')}
-                  onClick={onClose}
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-              <Link to="/satudata" onClick={onClose}>
-                <Button colorScheme="teal" variant="solid" width="100%">
-                  Masuk
-                </Button>
-              </Link>
-            </VStack>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
-    </Box>
-  );
-};
+            {/* Menu Mobile */}
+            {isOpen && (
+                <nav className="lg:hidden bg-white border-t border-gray-200">
+                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                        {navLinks.map((link) => (
+                            <NavLink
+                                key={link.name}
+                                to={link.path}
+                                onClick={() => setIsOpen(false)}
+                                className={({ isActive }) =>
+                                    `block px-3 py-2 rounded-md text-base font-medium ${
+                                        isActive ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`
+                                }
+                            >
+                                {link.name}
+                            </NavLink>
+                        ))}
+                        <Link
+                            to="/login"
+                            onClick={() => setIsOpen(false)}
+                            className="block w-full text-left px-3 py-3 rounded-md text-base font-medium bg-green-600 text-white text-center"
+                        >
+                            Login
+                        </Link>
+                    </div>
+                </nav>
+            )}
+        </header>
+    );
+}
 
 export default Header;

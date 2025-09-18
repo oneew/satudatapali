@@ -1,186 +1,128 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import {
-  Box,
-  Flex,
-  Text,
-  Badge,
-  Button,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Spinner,
-  Alert,
-} from "@chakra-ui/react";
-import { FaDownload, FaEye } from "react-icons/fa";
-import axios from "axios";
+// frontend/src/pages/open data/Detail.jsx (Revised and ready to copy)
 
-import "../../shared/dist/css/bootstrap.min.css";
-import "./OpenData.css";
-import "./Detail.css";
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import axios from "axios";
+// Perbaikan path impor ada di 2 baris berikut:
+import Header from "../../shared/components/header/header";
+import Footer from "../../shared/components/footer/footer";
+import { Download, Eye, ArrowLeft, Calendar, User, FileText, Tag, Layers } from "lucide-react";
 
 function Detail() {
   const { id } = useParams();
-  const [dataset, setDataset] = useState(null);
+  const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchDataset = async () => {
+    const fetchFile = async () => {
       try {
-        setLoading(true);
         const response = await axios.get(`/v1/files/${id}`);
-        setDataset(response.data.files);
+        setFile(response.data);
       } catch (err) {
-        setError(err);
-        console.error("Error fetching dataset", err);
+        setError("Gagal memuat detail data. Mungkin data tidak ditemukan.");
+        console.error("Error fetching file details:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchDataset();
+
+    fetchFile();
   }, [id]);
 
-  const HandleDownloadButton = async () => {
-    try {
-      const response = await axios.get(`/v1/download/${id}`, {
-        responseType: "blob",
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", dataset.name);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-    } catch (err) {
-      console.error("Error downloading file", err);
-    }
-  };
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Memuat data...</div>;
+  }
 
-  if (loading) return <Spinner />;
-  if (error)
-    return (
-      <Alert status="error">
-        <AlertIcon />
-        {error.message}
-      </Alert>
-    );
+  if (error) {
+    return <div className="flex items-center justify-center h-screen text-red-500">{error}</div>;
+  }
 
   return (
-    <Box
-      maxW="1070px"
-      mx="auto"
-      mt="8"
-      p="6"
-      borderWidth="1px"
-      borderRadius="lg"
-      boxShadow="sm"
-      bg="white"
-      mb={14}
-    >
-      {/* Header Section */}
-      <Box bg="teal.500" color="white" borderRadius="md" p="4" mb="4">
-        <Text className="heading">
-          {dataset.name}
-        </Text>
-        <Text className="subheading">
-          {dataset.metaData.produsen}
-        </Text>
-      </Box>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <Header />
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Link to="/opendata" className="flex items-center text-blue-600 hover:text-blue-800 font-semibold">
+            <ArrowLeft size={18} className="mr-2" />
+            Kembali ke Daftar Dataset
+          </Link>
+        </div>
 
-      {/* Info Section */}
-      <Flex align="center" justify="space-between" flexWrap="wrap" mb="6">
-        <Flex align="center" gap="4">
-          <Badge colorScheme="gray" fontSize="0.9em">
-            {dataset.metaData.dimensidataset}
-          </Badge>
-          <Badge colorScheme="green" fontSize="0.9em">
-            {dataset.temadataset}
-          </Badge>
-        </Flex>
-        <Flex align="center" gap="2">
-          <Button onClick={HandleDownloadButton} leftIcon={<FaDownload />} colorScheme="blue" size="sm">
-            Download File
-          </Button>
-        </Flex>
-      </Flex>
+        <div className="bg-white p-8 rounded-xl shadow-lg">
+          {/* Judul dan Tombol Aksi */}
+          <div className="flex flex-col md:flex-row justify-between md:items-start border-b pb-6 mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">{file.name}</h1>
+              <p className="text-gray-500 mt-2">Dibuat pada: {new Date(file.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
+            <div className="flex gap-4 mt-4 md:mt-0">
+              <a
+                href={`/v1/download/${file._id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                <Download size={16} className="mr-2" />
+                Unduh
+              </a>
+              <a
+                href={file.filePath.replace('public', '')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+              >
+                <Eye size={16} className="mr-2" />
+                Lihat
+              </a>
+            </div>
+          </div>
 
-      {/* Tabs Section */}
-      <Tabs variant="enclosed">
-        <TabList>
-          <Tab>Data</Tab>
-          <Tab>Metadata</Tab>
-        </TabList>
-
-        <TabPanels>
-          <TabPanel>
-            <Text fontSize="sm" color="gray.600">
-              Data content goes here. Replace this with the actual data or
-              charts related to the file.
-            </Text>
-          </TabPanel>
-          <TabPanel>
-            <Table>
-              <Thead>
-                <Tr>
-                  <Th>Informasi</Th>
-                  <Th>Detail</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                <Tr>
-                  <Td>Dataset Diperbarui:</Td>
-                  <Td>
-                    <Badge>
-                      {new Date(
-                        dataset.metaData.updatedAt
-                      ).toLocaleDateString("id", {day:"numeric",month:"long",year:"numeric"})}
-                    </Badge>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>Dataset Dibuat:</Td>
-                  <Td>
-                    <Badge>
-                      {new Date(
-                        dataset.metaData.createdAt
-                      ).toLocaleDateString("id", {day:"numeric",month:"long",year:"numeric"})}
-                    </Badge>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>Produsen Dataset:</Td>
-                  <Td>
-                    <Badge>{dataset.metaData.produsen}</Badge>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>Frekuensi:</Td>
-                  <Td>
-                    <Badge>{dataset.metaData.frekuensi}</Badge>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>Cakupan Dataset:</Td>
-                  <Td>
-                    <Badge>{dataset.metaData.cakupandata}</Badge>
-                  </Td>
-                </Tr>
-              </Tbody>
-            </Table>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
-    </Box>
+          {/* Detail Metadata */}
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-700 mb-4">Metadata</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+              <div className="flex items-start">
+                <User size={20} className="text-gray-500 mt-1 mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-gray-600">Produsen Data</h3>
+                  <p className="text-gray-800">{file.metaData.produsen}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <Layers size={20} className="text-gray-500 mt-1 mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-gray-600">Tema Dataset</h3>
+                  <p className="text-gray-800">{file.temadataset}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <Tag size={20} className="text-gray-500 mt-1 mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-gray-600">Dimensi Dataset</h3>
+                  <p className="text-gray-800">{file.metaData.dimensidataset}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <Calendar size={20} className="text-gray-500 mt-1 mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-gray-600">Frekuensi Pembaruan</h3>
+                  <p className="text-gray-800">{file.metaData.frekuensi}</p>
+                </div>
+              </div>
+              <div className="flex items-start col-span-1 md:col-span-2">
+                <FileText size={20} className="text-gray-500 mt-1 mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-gray-600">Deskripsi</h3>
+                  <p className="text-gray-800">{file.metaData.deskripsi}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
   );
 }
 

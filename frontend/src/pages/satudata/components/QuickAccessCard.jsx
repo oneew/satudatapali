@@ -1,58 +1,28 @@
-import { Box, Flex, Text, Icon } from "@chakra-ui/react";
-import { FiChevronRight } from "react-icons/fi";
+// frontend/src/pages/satudata/components/QuickAccessCard.jsx (Revised)
 
-const QuickAccessCard = ({ title, details, onOpen }) => {
+import React from 'react';
+
+// Terima 'icon' sebagai komponen, bukan string
+function QuickAccessCard({ title, value, icon: Icon, color }) {
+  const colorClasses = {
+    blue: 'bg-blue-500',
+    green: 'bg-green-500',
+    red: 'bg-red-500',
+    yellow: 'bg-yellow-500',
+  };
+
   return (
-    <Box 
-      as="button" 
-      onClick={onOpen} 
-      className="quick-access-card"
-      _hover={{ 
-        transform: "translateY(-5px)",
-        boxShadow: "0 10px 15px rgba(0, 0, 0, 0.1)",
-        borderColor: "teal.500"
-      }}
-      transition="all 0.3s ease"
-      position="relative"
-      bg="white"
-      borderRadius="lg"
-      p={6}
-      minH="150px"
-      boxShadow="0 4px 6px rgba(0, 0, 0, 0.05)"
-      border="1px solid"
-      borderColor="gray.200"
-      textAlign="left"
-      width="100%"
-    >
-      <Flex direction='column' alignItems='flex-start' h="100%">
-        <Text 
-          className="title" 
-          fontSize="lg" 
-          fontWeight="bold" 
-          color="gray.700"
-          mb={2}
-        >
-          {title}
-        </Text>
-        <Text 
-          className="details" 
-          fontSize="sm" 
-          color="gray.500"
-          lineHeight="1.5"
-        >
-          {details}
-        </Text>
-        <Icon 
-          as={FiChevronRight} 
-          position="absolute" 
-          right="20px" 
-          bottom="20px" 
-          color="teal.500" 
-          boxSize={6}
-        />
-      </Flex>
-    </Box>
+    <div className="bg-white p-6 rounded-lg shadow-md flex items-center justify-between hover:shadow-xl transition-shadow duration-300">
+      <div>
+        <p className="text-sm font-medium text-gray-500">{title}</p>
+        <p className="text-3xl font-bold text-gray-800">{value}</p>
+      </div>
+      <div className={`p-3 rounded-full text-white ${colorClasses[color] || 'bg-gray-500'}`}>
+        {/* Render komponen ikon di sini */}
+        {Icon && <Icon size={24} />}
+      </div>
+    </div>
   );
-};
+}
 
 export default QuickAccessCard;

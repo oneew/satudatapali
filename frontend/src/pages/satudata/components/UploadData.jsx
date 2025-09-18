@@ -1,223 +1,130 @@
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  HStack,
-  Input,
-  Select,
-  Text,
-  useToast,
-} from "@chakra-ui/react";
-import axios from "axios";
-import { useState } from "react";
-import { useAuth } from "../../../context/AuthContext";
+// frontend/src/pages/satudata/components/UploadData.jsx (Revised)
+import React, { useState } from 'react';
+import axios from 'axios';
+import { X, UploadCloud, FileUp } from 'lucide-react';
+import listPerangkatDaerah from './pilihan form upload data/ListPerangkatDaerah';
+import listTemaDataset from './pilihan form upload data/ListTemaDataset';
 
-import PerangkatDaerah from "./pilihan form upload data/ListPerangkatDaerah.js";
-import ListTema from "./pilihan form upload data/ListTemaDataset.js";
-import CakupanData from "./pilihan form upload data/CakupanData.js";
-import Frekuensi from "./pilihan form upload data/Frekuensi.js";
-import DimensiDataset from "./pilihan form upload data/DimensiDataset.js";
-
-export default function UploadData() {
+function UploadData({ show, handleClose }) {
   const [file, setFile] = useState(null);
-  const [form, setForm] = useState({
-    name: "",
-    temadataset: "",
-    produsen: "",
-    cakupandata: "",
-    frekuensi: "",
-    dimensidataset: "",
-    isPublic: "",
+  const [formData, setFormData] = useState({
+    name: '',
+    temadataset: '',
+    produsen: '',
+    deskripsi: '',
+    frekuensi: '',
+    dimensidataset: '',
+    cakupandata: '',
   });
-  const { token } = useAuth();
-  const toast = useToast();
+  const [message, setMessage] = useState('');
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const validateForm = () => {
-    for (const key in form) {
-      if (!form[key] || form[key] === "") {
-        return false; // Return false if any field is empty
-      }
-    }
-    if (!file) {
-      return false; // Return false if no file is selected
-    }
-    return true; // All fields are filled
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
   };
 
-  const handleUpload = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      toast({
-        title: "Error",
-        description: "Mohon isi seluruh form dan pilih file",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-      return; // Stop the upload process if validation fails
+    if (!file) {
+      setMessage('Silakan pilih file untuk diunggah.');
+      return;
     }
+
+    const data = new FormData();
+    data.append('file', file);
+    Object.keys(formData).forEach(key => {
+      data.append(key, formData[key]);
+    });
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("name", form.name);
-      formData.append("temadataset", form.temadataset);
-      formData.append("produsen", form.produsen);
-      formData.append("cakupandata", form.cakupandata);
-      formData.append("frekuensi", form.frekuensi);
-      formData.append("dimensidataset", form.dimensidataset);
-      formData.append("isPublic", form.isPublic);
-
-      const response = await axios.post("/v1/files/upload", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await axios.post('/v1/files/upload', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      toast({
-        title: "Berhasil",
-        description: response.data.message,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
+      setMessage(response.data.message);
+      // Reset form on success
+      setFile(null);
+      setFormData({ name: '', temadataset: '', produsen: '', deskripsi: '', frekuensi: '', dimensidataset: '', cakupandata: '' });
     } catch (error) {
-      toast({
-        title: "Error uploading file",
-        description: error.response.data.message,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+      setMessage(error.response?.data?.message || 'Gagal mengunggah file.');
     }
   };
 
+  if (!show) return null;
+
   return (
-    <Box mt={4} height="fit-content">
-      <form onSubmit={handleUpload}>
-        <FormControl mb={3}>
-          <FormLabel>Nama File</FormLabel>
-          <Input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-          />
-        </FormControl>
-        <FormControl mb={3}>
-          <FormLabel>Produsen</FormLabel>
-          <Select
-            name="produsen"
-            value={form.produsen}
-            onChange={handleChange}
-            placeholder="Pilih Perangkat Daerah"
-          >
-            {PerangkatDaerah.map((item, index) => (
-              <option value={item} key={index}>
-                {item}
-              </option>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl mb={3}>
-          <FormLabel>Tema Dataset</FormLabel>
-          <Select
-            name="temadataset"
-            value={form.temadataset}
-            onChange={handleChange}
-            placeholder="Pilih Tema"
-          >
-            {ListTema.map((item, index) => (
-              <option value={item} key={index}>
-                {item}
-              </option>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl mb={3}>
-          <FormLabel>Cakupan Data</FormLabel>
-          <Select
-            name="cakupandata"
-            value={form.cakupandata}
-            onChange={handleChange}
-            placeholder="Pilih Cakupan"
-          >
-            {CakupanData.map((item, index) => (
-              <option value={item} key={index}>
-                {item}
-              </option>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl mb={3}>
-          <FormLabel>Frekuensi</FormLabel>
-          <Select
-            name="frekuensi"
-            value={form.frekuensi}
-            onChange={handleChange}
-            placeholder="Pilih Frekuensi"
-          >
-            {Frekuensi.map((item, index) => (
-              <option value={item} key={index}>
-                {item}
-              </option>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl>
-          <FormLabel>Dimensi Dataset</FormLabel>
-          <Select
-            name="dimensidataset"
-            value={form.dimensidataset}
-            onChange={handleChange}
-            placeholder="Pilih Dimensi"
-          >
-            {DimensiDataset.map((item, index) => (
-              <option value={item} key={index}>
-                {item}
-              </option>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl mb={3} alignItems="center">
-          <FormLabel>File</FormLabel>
-          <Input
-            type="file"
-            name="file"
-            accept=".pdf,.doc,.docx,.xls,.xlsx"
-            onChange={(e) => setFile(e.target.files[0])}
-          />
-          <FormHelperText>
-            Format file: .pdf, .doc, .docx, .xls, .xlsx
-          </FormHelperText>
-          <FormHelperText>Maksimal file: 5 MB</FormHelperText>
-        </FormControl>
-        <FormControl mb={3}>
-          <FormLabel>Set Data Publik</FormLabel>
-          <Select
-            name="isPublic"
-            value={form.isPublic}
-            onChange={handleChange}
-            placeholder="Select"
-          >
-            <option value="true">Data Publik</option>
-            <option value="false">Data Staging</option>
-          </Select>
-        </FormControl>
-        <Flex justifyContent="center">
-          <Button type="submit" colorScheme="blue" mt={4}>
-            Simpan
-          </Button>
-        </Flex>
-      </form>
-    </Box>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="text-xl font-bold text-gray-800 flex items-center"><FileUp className="mr-2"/> Unggah Data Baru</h2>
+          <button onClick={handleClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+        </div>
+        <div className="p-6 overflow-y-auto">
+          {message && <p className="mb-4 p-3 text-sm text-center rounded-md bg-blue-50 text-blue-700">{message}</p>}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nama Data */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Nama Data</label>
+                <input type="text" name="name" value={formData.name} onChange={handleInputChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+              </div>
+              {/* Produsen Data */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Produsen Data (OPD)</label>
+                <select name="produsen" value={formData.produsen} onChange={handleInputChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                  <option value="">Pilih OPD</option>
+                  {listPerangkatDaerah.map(opd => <option key={opd} value={opd}>{opd}</option>)}
+                </select>
+              </div>
+              {/* Tema Dataset */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Tema Dataset</label>
+                <select name="temadataset" value={formData.temadataset} onChange={handleInputChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                  <option value="">Pilih Tema</option>
+                  {listTemaDataset.map(tema => <option key={tema} value={tema}>{tema}</option>)}
+                </select>
+              </div>
+              {/* Frekuensi Pembaruan */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Frekuensi Pembaruan</label>
+                <input type="text" name="frekuensi" value={formData.frekuensi} onChange={handleInputChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+              </div>
+            </div>
+            {/* Deskripsi */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Deskripsi</label>
+              <textarea name="deskripsi" value={formData.deskripsi} onChange={handleInputChange} rows="3" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+            {/* File Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Pilih File</label>
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                <div className="space-y-1 text-center">
+                  <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="flex text-sm text-gray-600">
+                    <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                      <span>Pilih sebuah file</span>
+                      <input id="file-upload" name="file" type="file" onChange={handleFileChange} className="sr-only" required />
+                    </label>
+                    <p className="pl-1">atau tarik dan lepas di sini</p>
+                  </div>
+                  {file ? <p className="text-sm text-gray-500">{file.name}</p> : <p className="text-xs text-gray-500">PDF, DOCX, XLSX, dll.</p>}
+                </div>
+              </div>
+            </div>
+            <div className="pt-2">
+              <button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Unggah
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
+
+export default UploadData;

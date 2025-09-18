@@ -1,112 +1,54 @@
 import React from 'react';
-import { Box, Container, Stack, Text, Image, HStack, VStack, Divider, Link } from '@chakra-ui/react';
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaGlobe, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
-import logoPali from '/pali.png';
-import './footerStyle.css';
+import { Mail, MapPin, Phone } from 'lucide-react';
+import paliLogo from '/pali.png'; // Menggunakan logo PALI
 
-const Footer = () => {
+function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <Box className="footer">
-      <Container maxW="container.xl" py={10}>
-        <Stack 
-          direction={{ base: 'column', md: 'row' }} 
-          spacing={8} 
-          justify="space-between"
-          className="footer-top"
-        >
-          {/* Logo and Description */}
-          <VStack spacing={4} align="flex-start" className="footer-section">
-            <HStack>
-              <Image src={logoPali} boxSize="50px" alt="Logo PALI" className="main-logo" />
-              <Text fontSize="lg" fontWeight="bold" color="white" className="footer-logo-heading">
-                Satu Data PALI
-              </Text>
-            </HStack>
-            <Text fontSize="sm" className="footer-subtext">
-              Dikelola oleh Dinas Komunikasi dan Informatika,<br />
-              Statistik dan Persandian Kabupaten PALI.
-            </Text>
-          </VStack>
+    <footer className="bg-gray-800 text-gray-300">
+      <div className="container mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 
-          {/* Contact Information */}
-          <VStack spacing={2} align="flex-start" className="footer-section">
-            <Text fontWeight="bold" color="white" className="footer-heading">
-              Kontak Kami
-            </Text>
-            <HStack>
-              <FaMapMarkerAlt />
-              <Text fontSize="sm" className="footer-link">
-                Jl. Merdeka, Talang Ubi, PALI
-              </Text>
-            </HStack>
-            <HStack>
-              <FaPhone />
-              <Text fontSize="sm" className="footer-link">
-                (0713) XXX XXX
-              </Text>
-            </HStack>
-            <HStack>
-              <FaEnvelope />
-              <Text fontSize="sm" className="footer-link">
-                diskominfo@palikab.go.id
-              </Text>
-            </HStack>
-          </VStack>
-          
-          {/* Related Links */}
-          <VStack spacing={2} align="flex-start" className="footer-section">
-            <Text fontWeight="bold" color="white" className="footer-heading">
-              Tautan Terkait
-            </Text>
-            <Link href="#" fontSize="sm" className="footer-link">
-              Portal Pemkab PALI
-            </Link>
-            <Link href="#" fontSize="sm" className="footer-link">
-              Satu Data Indonesia
-            </Link>
-            <Link href="#" fontSize="sm" className="footer-link">
-              Kementerian Kominfo
-            </Link>
-            <Link href="#" fontSize="sm" className="footer-link">
-              BPS Kabupaten PALI
-            </Link>
-          </VStack>
+          <div className="lg:col-span-2">
+            <div className="flex items-center mb-4">
+              <img src={paliLogo} alt="Satu Data PALI" className="h-16 w-18 mr-4" />
+              <div>
+                <h2 className="text-xl font-bold text-white">Portal Satu Data</h2>
+                <p className="text-gray-400">Kabupaten Penukal Abab Lematang Ilir</p>
+              </div>
+            </div>
+            <p className="text-gray-400 max-w-md">
+              Diselenggarakan oleh Dinas Komunikasi dan Informatika (Diskominfo-Staper) Kabupaten PALI sebagai platform resmi data terpadu untuk mendukung kebijakan berbasis data.
+            </p>
+          </div>
 
-          {/* Social Media */}
-          <VStack spacing={2} align="flex-start" className="footer-section">
-            <Text fontWeight="bold" color="white" className="footer-heading">
-              Ikuti Kami
-            </Text>
-            <HStack className="social-icons">
-              <Link href="#" className="social-icon">
-                <FaFacebook />
-              </Link>
-              <Link href="#" className="social-icon">
-                <FaTwitter />
-              </Link>
-              <Link href="#" className="social-icon">
-                <FaInstagram />
-              </Link>
-              <Link href="#" className="social-icon">
-                <FaGlobe />
-              </Link>
-            </HStack>
-          </VStack>
-        </Stack>
-      </Container>
-      
-      <Divider className="footer-divider" />
-      
-      <Box py={4} className="footer-bottom">
-        <Text className="footer-bottom-text">
-          © {new Date().getFullYear()} Dinas Komunikasi dan Informatika Kabupaten PALI. All rights reserved.
-        </Text>
-        <Text className="footer-bottom-text">
-          Support by <Link href="#" color="yellow.400" fontWeight="semibold">Kominfo PALI</Link>
-        </Text>
-      </Box>
-    </Box>
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-4">Hubungi Kami</h3>
+            <address className="not-italic text-gray-400 space-y-3">
+              <p className="flex items-start">
+                <MapPin size={18} className="mr-3 mt-1 flex-shrink-0 text-green-400" />
+                <span>Jl. Merdeka, Talang Ubi, Kabupaten PALI, Sumatera Selatan</span>
+              </p>
+              <p className="flex items-center">
+                <Phone size={18} className="mr-3 flex-shrink-0 text-green-400" />
+                <span>(0713) 390-123 (Contoh)</span>
+              </p>
+              <p className="flex items-center">
+                <Mail size={18} className="mr-3 flex-shrink-0 text-green-400" />
+                <span>diskominfo@palikab.go.id</span>
+              </p>
+            </address>
+          </div>
+        </div>
+      </div>
+      <div className="bg-gray-900">
+        <div className="container mx-auto px-6 py-4 text-center text-gray-500 text-sm">
+          &copy; {currentYear} Dinas Komunikasi dan Informatika Kabupaten PALI.
+        </div>
+      </div>
+    </footer>
   );
-};
+}
 
 export default Footer;

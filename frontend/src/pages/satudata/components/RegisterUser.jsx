@@ -1,179 +1,82 @@
-import React from "react";
-import {
-  Box,
-  Input,
-  Button,
-  InputGroup,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  FormHelperText,
-  InputRightElement,
-  Select,
-  Flex,
-  useToast,
-} from "@chakra-ui/react";
-import axios from "axios";
+// frontend/src/pages/satudata/components/RegisterUser.jsx (Revised)
+import React, { useState } from 'react';
+import axios from 'axios';
+import { X, UserPlus } from 'lucide-react';
 
-import { useAuth } from "../../../context/AuthContext";
-import useFormValidation from "../../../hooks/useFormValidation";
-import PerangkatDaerah from "./pilihan form upload data/ListPerangkatDaerah";
+function RegisterUser({ show, handleClose }) {
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    email: '',
+    name: '',
+    role: 'operator', // Default role
+  });
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-function RegisterUser() {
-  const { token } = useAuth();
-
-  const [name, setName] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [role, setRole] = React.useState("");
-  const [opd, setOpd] = React.useState("");
-  const toast = useToast();
-
-  const { error, helperText, validate } = useFormValidation()
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate(name, email, username, password, role)) {
-      try {
-        const response = await axios.post("/v1/users/register", {
-          name: name,
-          email: email,
-          username: username,
-          password: password,
-          role: role,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (response.status == 201) {
-          toast({
-            title: "Berhasil",
-            description: `User Berhasil Ditambahkan untuk ${response.data.user}`,
-            status: "success",
-            duration: 2000,
-            isClosable: true,
-          });
-          setName("");
-          setEmail("");
-          setUsername("");
-          setPassword("");
-          setRole("");
-        } 
-      } catch (error) {
-        if (error.response.status == 400) {
-            toast({
-              title: "Gagal",
-              description: `User ${error.response.data.user} Sudah Ada`,
-              status: "error",
-              duration: 2000,
-              isClosable: true,
-            })
-          } else {
-            toast({
-              title: "Error",
-              description: "Terjadi Kesalahan pada Server",
-              status: "error",
-              duration: 3000,
-              isClosable: true,
-            });
-          }
-      }
-    } else {
-      toast({
-        title: "Error",
-        description: "Input Tidak Valid, Mohon Periksa Kembali Form Di Atas",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+    setMessage('');
+    setError('');
+    try {
+      const response = await axios.post('/v1/users/register', formData);
+      setMessage(response.data.message || 'Pengguna berhasil diregistrasi.');
+      setFormData({ username: '', password: '', email: '', name: '', role: 'operator' }); // Reset form
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal meregistrasi pengguna.');
     }
   };
 
-  const [show, setShow] = React.useState(false);
-  const handleClick = () => setShow(!show);
+  if (!show) return null;
 
   return (
-    <Box mt={4} height="fit-content">
-      <form onSubmit={handleSubmit}>
-        <FormControl mb={4} isInvalid={error.email}>
-          <FormLabel>Email</FormLabel>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <FormErrorMessage>{helperText.email}</FormErrorMessage>
-        </FormControl>
-
-        <FormControl mb={4} isInvalid={error.name}>
-          <FormLabel>Name</FormLabel>
-          <Input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <FormErrorMessage>{helperText.name}</FormErrorMessage>
-        </FormControl>
-
-        <FormControl mb={4} isInvalid={error.username}>
-          <FormLabel>Username</FormLabel>
-          <Input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </FormControl>
-
-        <FormControl mb={4} isInvalid={error.password}>
-          <FormLabel>Password</FormLabel>
-          <InputGroup>
-            <Input
-              type={show ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <InputRightElement>
-              <Button size="sm" onClick={handleClick}>
-                {show ? "Hide" : "Show"}
-              </Button>
-            </InputRightElement>
-          </InputGroup>
-        </FormControl>
-
-        <FormControl mb={4}>
-          <FormLabel>User Role</FormLabel>
-          <Select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            placeholder="Pilih Role"
-          >
-            <option>Validator</option>
-            <option>Operator</option>
-          </Select>
-        </FormControl>
-
-        <FormControl mb={4}>
-          <FormLabel>Perangkat Daerah</FormLabel>
-          <Select
-            value={opd}
-            onChange={(e) => setOpd(e.target.value)}
-            placeholder="Pilih Perangkat Daerah"
-          >
-            {PerangkatDaerah.map((perangkatDaerah) => (
-              <option key={perangkatDaerah}>{perangkatDaerah}</option>
-            ))}
-          </Select>
-        </FormControl>
-
-        <Flex mt={8} alignItems="center">
-          <Button type="submit" alignSelf="center" colorScheme="blue">
-            Simpan
-          </Button>
-        </Flex>
-      </form>
-    </Box>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4">
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="text-xl font-bold text-gray-800 flex items-center"><UserPlus className="mr-2"/> Registrasi Pengguna Baru</h2>
+          <button onClick={handleClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+        </div>
+        <div className="p-6">
+          {message && <p className="mb-4 p-3 text-sm text-center rounded-md bg-green-50 text-green-700">{message}</p>}
+          {error && <p className="mb-4 p-3 text-sm text-center rounded-md bg-red-50 text-red-700">{error}</p>}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+              <input type="text" name="name" value={formData.name} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Username</label>
+              <input type="text" name="username" value={formData.username} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <input type="email" name="email" value={formData.email} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <input type="password" name="password" value={formData.password} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Peran (Role)</label>
+              <select name="role" value={formData.role} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <option value="operator">Operator</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div className="pt-2">
+              <button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Registrasi
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,99 +1,46 @@
-import React from "react";
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Button,
-  Text,
-  Link,
-  Box,
-  Image,
-  VStack,
-} from "@chakra-ui/react";
-import logoPali from "/pali.png";
+// frontend/src/pages/login/components/CustomModal.jsx (Revised and Final)
 
-function CustomModal({ isOpen, onClose }) {
+import React from 'react';
+import { ShieldAlert } from 'lucide-react';
+
+function CustomModal({ message, onClose }) {
+  // Mencegah klik di dalam modal ikut menutup modal
+  const handleModalContentClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl">
-      <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
-      <ModalContent 
-        borderRadius="2xl" 
-        overflow="hidden"
-        boxShadow="2xl"
+    // Latar belakang gelap
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      {/* Konten Modal */}
+      <div 
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-sm transform transition-all animate-fade-in-up"
+        onClick={handleModalContentClick}
       >
-        <ModalHeader 
-          bg="green.500" 
-          color="white"
-          textAlign="center"
-          py={6}
-        >
-          <VStack spacing={3}>
-            <Image 
-              src={logoPali} 
-              alt="Logo Satu Data PALI" 
-              boxSize="50px"
-              borderRadius="full"
-              border="2px solid"
-              borderColor="white"
-            />
-            <Text fontSize="2xl" fontWeight="bold">
-              Satu Data PALI
-            </Text>
-          </VStack>
-        </ModalHeader>
-        <ModalCloseButton color="white" />
-        <ModalBody py={8} px={6}>
-          <Text fontSize="lg" color="gray.700" textAlign="center" mb={6}>
-            Jika Anda Belum Punya Akun
-          </Text>
-          <Box 
-            bg="gray.50" 
-            borderRadius="lg" 
-            p={6}
-            border="1px solid"
-            borderColor="gray.200"
-          >
-            <Text className="text" mb={4}>
-              Anda harus mendaftarkan diri melalui email resmi{" "}
-              <Link 
-                color="green.500" 
-                fontWeight="semibold"
-                href="mailto:diskominfo@pallikab.go.id"
-              >
-                diskominfo@pallikab.go.id
-              </Link>{" "}
-              untuk mendapatkan akses Dashboard ke Satu Data PALI.
-            </Text>
-            <Text className="text">
-              Persyaratan untuk mendaftarkan diri akan diinformasikan lebih lanjut
-              pada update selanjutnya.
-            </Text>
-          </Box>
-        </ModalBody>
-        <ModalFooter bg="gray.50" justifyContent="center" py={4}>
-          <Button 
+        <div className="p-6 text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
+            <ShieldAlert className="h-10 w-10 text-red-600" />
+          </div>
+          <h3 className="mt-4 text-xl font-semibold text-gray-800">
+            Terjadi Kesalahan
+          </h3>
+          <div className="mt-2 text-md text-gray-600 px-2">
+            {message}
+          </div>
+        </div>
+        <div className="bg-gray-50 px-6 py-4 rounded-b-2xl">
+          <button
             onClick={onClose}
-            bg="green.500"
-            color="white"
-            size="md"
-            fontWeight="bold"
-            borderRadius="lg"
-            px={8}
-            _hover={{
-              bg: "green.600",
-              transform: "translateY(-2px)",
-            }}
-            transition="all 0.3s ease"
+            className="w-full px-4 py-2.5 bg-gradient-to-r from-teal-600 to-teal-700 text-white font-semibold rounded-lg hover:from-teal-700 hover:to-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-300 shadow-md hover:shadow-lg"
           >
             Tutup
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,207 +1,120 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  VStack,
-  Text,
-  Heading,
-  useBreakpointValue,
-  InputGroup,
-  InputLeftElement,
-  Image,
-  HStack,
-  Flex,
-} from "@chakra-ui/react";
-import { MdLock } from "react-icons/md";
-import { FaUser } from "react-icons/fa";
-
+// frontend/src/pages/login/Login.jsx (Revised)
+import React, { useState, useContext } from "react"; // 1. Tambahkan import useContext
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext"; // 2. Impor AuthContext
 import CustomModal from "./components/CustomModal";
-import logoPali from "/pali.png";
+import paliImage from "/pali.png";
+import "./login.css"; // Import custom CSS
 
 function Login() {
-  const navigate = useNavigate();
-  const { login, autoLogin } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-
-  useEffect(() => {
-    const userdata = localStorage.getItem("userData");
-    if (userdata) {
-    autoLogin();
-    navigate('/satudata/dashboard');} else {
-      return undefined;
-    }
-  }, []);
+  const [modalMessage, setModalMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useContext(AuthContext); // 3. Gunakan useContext di sini
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-        setError(null); // Reset error state
+    setIsLoading(true);
+    try {
+      const response = await axios.post("/v1/users/login", {
+        username,
+        password,
+      });
+      const { token, user, role } = response.data;
+      login(token, user, role);
+      navigate("/dashboard");
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        "Login Gagal! Periksa kembali username dan password Anda.";
+      setModalMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        try {
-            await login(username, password);
-            navigate('/satudata/dashboard'); // Adjust based on your routing
-        } catch (err) {
-          if (err.response) {
-            setError(err.response.data.message || "An error occurred. Please try again.");
-        } else if (err.request) {
-            // The request was made but no response was received
-            setError("No response from the server. Please check your network connection.");
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            setError(err.message);
-        }
-        }
-};
-
-    const HandleModalOpen = () => {
-      setShowModal(true);
-    };
-    const HandleModalClose = () => {
-      setShowModal(false)
-      };
+  const closeModal = () => setModalMessage("");
 
   return (
-    <Flex
-      minHeight="100vh"
-      width="full"
-      align="center"
-      justifyContent="center"
-      bg="white"
-      p={4}
-    >
-      <Box
-        bg="green.500"
-        p={8}
-        borderRadius="2xl"
-        boxShadow="2xl"
-        width="100%"
-        maxWidth="450px"
-        textAlign="center"
-      >
-        {/* Logo and Title Section */}
-        <VStack spacing={6} mb={6}>
-          <HStack spacing={4} justify="center">
-            <Image 
-              src={logoPali} 
-              alt="Logo Satu Data PALI" 
-              height="10rem"
-              width="auto"
+    <div className="login-container">
+      <div className="login-card">
+        <div className="flex flex-col items-center">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 bg-green-500 rounded-full blur-md opacity-30 animate-pulse"></div>
+            <img 
+              src={paliImage} 
+              alt="PALI Logo" 
+              className="login-logo relative"
             />
-          </HStack>
-          <Box>
-            <Heading as="h1" size="xl" color="white" fontWeight="bold">
-              SatuData PALI
-            </Heading>
-          </Box>
-        </VStack>
-
-        {/* Login Form */}
-        <Box as="form" onSubmit={handleSubmit}>
-          <VStack spacing={5} align="stretch">
-            {error && (
-              <Box 
-                bg="red.50" 
-                borderRadius="md" 
-                p={3} 
-                mb={4}
-              >
-                <Text color="red.500" fontSize="sm" textAlign="center">
-                  {error}
-                </Text>
-              </Box>
-            )}
-
-            <FormControl isRequired>
-              <FormLabel htmlFor="username" color="white" fontWeight="medium">
-                Username
-              </FormLabel>
-              <InputGroup>
-                <InputLeftElement
-                  pointerEvents="none"
-                  children={<FaUser color="green.500" />}
-                />
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Masukkan username Anda"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  bg="white"
-                  borderRadius="lg"
-                  border="1px solid"
-                  borderColor="gray.300"
-                  _focus={{
-                    borderColor: "green.500",
-                    boxShadow: "0 0 0 1px green.500",
-                  }}
-                  py={6}
-                />
-              </InputGroup>
-            </FormControl>
-
-            <FormControl isRequired>
-              <FormLabel htmlFor="password" color="white" fontWeight="medium">
-                Password
-              </FormLabel>
-              <InputGroup>
-                <InputLeftElement
-                  pointerEvents="none"
-                  children={<MdLock color="green.500" />}
-                />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Masukkan password Anda"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  bg="white"
-                  borderRadius="lg"
-                  border="1px solid"
-                  borderColor="gray.300"
-                  _focus={{
-                    borderColor: "green.500",
-                    boxShadow: "0 0 0 1px green.500",
-                  }}
-                  py={6}
-                />
-              </InputGroup>
-            </FormControl>
-
-            <Button
+          </div>
+          <h2 className="login-title">
+            Satu Data PALI
+          </h2>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              Username
+            </label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              required
+              className="login-input"
+              placeholder="Masukkan username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              className="login-input"
+              placeholder="Masukkan password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <div>
+            <button
               type="submit"
-              bg="white"
-              color="green.500"
-              size="lg"
-              fontSize="md"
-              fontWeight="bold"
-              borderRadius="lg"
-              mt={4}
-              py={6}
-              _hover={{
-                bg: "green.100",
-                transform: "translateY(-2px)",
-                boxShadow: "lg"
-              }}
-              _active={{
-                transform: "translateY(0)",
-              }}
-              transition="all 0.3s ease"
-              boxShadow="md"
+              disabled={isLoading}
+              className="login-button"
             >
-              Masuk
-            </Button>
-          </VStack>
-        </Box>
-      </Box>
-      <CustomModal isOpen={showModal} onClose={HandleModalClose} />
-    </Flex>
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Memproses...
+                </div>
+              ) : (
+                "Masuk"
+              )}
+            </button>
+          </div>
+        </form>
+        <div className="text-center pt-4">
+          <Link to="/" className="login-link">
+            ← Kembali ke Halaman Utama
+          </Link>
+        </div>
+      </div>
+      {modalMessage && <CustomModal message={modalMessage} onClose={closeModal} />}
+    </div>
   );
 }
 

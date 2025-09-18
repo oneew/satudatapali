@@ -1,26 +1,28 @@
-import React from 'react'
+// frontend/src/pages/satudata/components/LogoutButton.jsx (Revised)
+
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
-import axios from 'axios';
-import { Button, Link } from '@chakra-ui/react';
+import { AuthContext } from '../../../context/AuthContext';
+import { LogOut } from 'lucide-react'; // Menggunakan ikon dari Lucide
 
+function LogoutButton({ isSidebarOpen }) {
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-function LogoutButton() {
-    const { logout } = useAuth();
-    const navigate = useNavigate();
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-            navigate('/satudata');
-        } catch (error) {
-            console.error('Logout failed', error);
-        }
-    };
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
-        <Button colorScheme='red' variant={'outline'} onClick={handleLogout}>Logout</Button>
-  )
+    <button
+      onClick={handleLogout}
+      className="w-full flex items-center px-4 py-3 text-red-400 hover:bg-red-700 hover:text-white rounded-md transition-colors"
+    >
+      <LogOut className="h-6 w-6" />
+      {isSidebarOpen && <span className="ml-4">Keluar</span>}
+    </button>
+  );
 }
 
-export default LogoutButton
+export default LogoutButton;

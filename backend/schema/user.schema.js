@@ -1,11 +1,8 @@
-// user shema (with id, username, email, password, name, role, image, createdAt, updatedAt)
+// user schema (with id, username, email, password, name, role, image, createdAt, updatedAt)
 
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    _id: {
-        type: mongoose.Schema.Types.ObjectId,
-    },
     username: {
         type: String,
         required: true,
